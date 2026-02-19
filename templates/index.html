@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cotações Competidores</title>
+    <script src="/static/js/app.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+
+<body>
+    <header class="app-header navbar">
+        <div class="nome-barra">
+            Cotações - SAFE SOLUÇÕES
+        </div>
+        <div class="toggled-buttom">
+            <button type="button" id="toggled" onclick="toggled()">
+                <i class="ph ph-sun tg"></i>
+                <i class="ph ph-moon tg-night"></i>
+            </button>
+            <button type="button" id="btnLogout" class="out-button" onclick="chamar_logout()">
+                <i class="ph ph-sign-out"></i>
+            </button>
+        </div>
+    </header>
+    <div style="height: 100%; border: 1px solid #a4b7c1; margin-top: -1px; padding: 16px;">
+        <div>
+            <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
+                <div class="header-default df alg fw header-tab">
+                    <button class="glass-btn" onclick="buscar_cotacao()">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                    <button type="button" id="btn-atualizar" onclick="adicionar_info_cotacao()">
+                        <i class="ph ph-user-switch"></i>
+                    </button>
+                </div>
+                <div class="form-geral-tabs">
+                    <form class="ng-untouched ng-pristine ng-valid">
+                        <div class="form-header">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Nº do Documento</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="DocNum">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Nome Cliente</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="CardName" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Código Cliente</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="CardCode" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Info Cotação</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="JournalMemo" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Vendedor</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="SalesPerson" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Data de Lançamento</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="DocDate" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Uso Principal</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="MainUsage" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 segund-col">
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Status</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="Status" disabled>
+                                                    <option value=""></option>
+                                                    <option value="bost_Close">Fechado</option>
+                                                    <option value="bost_Open">Em aberto</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Total</label>
+                                            </div>
+                                            <div class="col-xl-3 field">
+                                                <input type="text" id="DocTotal" disabled>
+                                            </div>
+                                            <div class="col-xl-3 label last-4-inputs">
+                                                <label>DocEntry</label>
+                                            </div>
+                                            <div class="col-xl-3 field">
+                                                <input type="text" id="DocEntry" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Filial</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="BPLName" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Pessoa de Contato</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="ContactPersonCode" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Número da Licitação</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_NumLicitacao">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Esfera</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="U_Esfera">
+                                                    <option value="">Selecione</option>
+                                                    <option value="E">Estadual</option>
+                                                    <option value="F">Federal</option>
+                                                    <option value="M">Municipal</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Modalidade</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="U_Modalidade">
+                                                    <option value="">Selecione</option>
+                                                    <option value="PE">Pregão Eletrônico</option>
+                                                    <option value="SI">Sincovi</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div style="height: 100%; border: 1px solid #a4b7c1; margin-top: -1px; padding: 16px;">
+        <div>
+            <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
+                <div class="header-default df alg fw header-tab">
+                    <button type="button" onclick="criar_concorrente()" id="btnadd">
+                        <i class="ph ph-user-circle-plus"></i>
+                    </button>
+                </div>
+                <div class="form-geral-tabs">
+                    <form class="ng-untouched ng-pristine ng-valid">
+                        <div class="form-header">
+                            <div class="row">
+                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Concorrente</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="concorrente">
+                                                    <option value="">Selecione</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Ameaça</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="U_ThreatLevel">
+                                                    <option value="">Selecione</option>
+                                                    <option value="Low">Baixo</option>
+                                                    <option value="Medium">Médio</option>
+                                                    <option value="High">Alto</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Marca/Fabricante</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_Marca">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Modelo</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_Modelo">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>V. Unitário</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_ValorUnit">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>V. Total</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_ValorTot">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Observação</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <input type="text" id="U_Observacao">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 segund-col">
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Quantidade</label>
+                                            </div>
+                                            <div class="col-xl-3 field">
+                                                <input type="number" id="U_Quantidade">
+                                            </div>
+                                            <div class="col-xl-3 label last-4-inputs">
+                                                <label>Posição</label>
+                                            </div>
+                                            <div class="col-xl-3 field last-4-inputs">
+                                                <input type="number" id="U_Posicao">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Itens Cotação</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="ItemCotacao">
+                                                    <option value="">Selecione</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div style="height: 100%; border: 1px solid #a4b7c1; margin-top: -1px; padding: 16px;">
+        <div>
+            <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
+                <div class="header-default df alg fw header-tab">
+                    <button id="btnAtualizarConcorrente" onclick="atualizar_concorrente()" type="button">
+                        <i class="ph ph-user-switch atualizar"></i>
+                    </button>
+                </div>
+            </section>
+            <!-- Aba Concorrentes -->
+            <div id="concorrentes" class="tab-content active">
+                <div class="aba-concorrentes">
+                    <div class="concorrentes-grid" id="grid-concorrentes">
+                        <div>Linha</div>
+                        <div>Concorrente</div>
+                        <div>Grau de Ameaça</div>
+                        <div>Marca/Fabricante</div>
+                        <div>Modelo</div>
+                        <div>Observação</div>
+                        <div>Qtde</div>
+                        <div>V. Unitário</div>
+                        <div>V. Total</div>
+                        <div>Posição</div>
+                        <div>Item Safe</div>
+
+                        <div><input type="hidden" class="rowno" readonly /></div>
+                        <div><select class="grid-select conc">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div>
+                            <select class="grid-select">
+                                <option value=""></option>
+                                <option value="Low">Baixo</option>
+                                <option value="Medium">Médio</option>
+                                <option value="High">Alto</option>
+                            </select>
+                        </div>
+                        <div><input type="text" /></div>
+                        <div><input type="text" /></div>
+                        <div><input type="text" /></div>
+                        <div><input type="number" /></div>
+                        <div><input type="text" /></div>
+                        <div><input type="text" /></div>
+                        <div><input type="number" /></div>
+                        <div>
+                            <select class="items-safe">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para adicionar novo concorrente -->
+    <div id="modalConcorrente" class="modal">
+        <div class="modal-content">
+            <span onclick="fecharModal()" class="close">&times;</span>
+            <h3>Definir Novo Competidor</h3>
+            <label for="nomeCompetidor">Nome do Competidor</label>
+            <input type="text" id="nomeCompetidor" required />
+            <button type="button" id="btnmodal" onclick="criarConcorrente()">Salvar</button>
+            <p>O nome só pode possuir 15 caracteres.</p>
+        </div>
+    </div>
+</body>
+
+</html>

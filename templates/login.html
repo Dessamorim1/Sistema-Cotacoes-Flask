@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticação</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <div class="img-deco">
+        <img src="/static/img/grafico.svg" class="icon icon-1" />
+        <img src="/static/img/grafico.svg" class="icon icon-2" />
+        <img src="/static/img/grafico.svg" class="icon icon-3" />
+        <img src="/static/img/grafico.svg" class="icon icon-4" />
+    </div>
+
+    <div class="container">
+        <div class="main-login">
+            <div class="left-login">
+                <div class="titulo">
+                    <h1>Seja bem-vindo!</h1>
+                    <p>
+                        Utilize suas credenciais SAP para acessar o sistema de cotações interativo.
+                        Consulte as cotações do banco de dados, crie concorrentes e atualize informações
+                    </p>
+                    <p class="final">
+                        com facilidade.
+                    </p>
+                </div>
+                <img src="/static/img/persons.svg" />
+            </div>
+            <div class="right-login">
+                <div class="card">
+                    <form id="loginForm">
+                        <h1>Acessar</h1>
+
+                        <div class="Login">
+                            <input type="text" id="Company" name="app_company" placeholder=" " required>
+                            <label for="Company">Nome Empresa</label>
+                        </div>
+
+                        <div class="Login">
+                            <input type="text" id="User" name="app_user" placeholder=" " required>
+                            <label for="User">Usuário</label>
+                        </div>
+
+                        <div class="Login">
+                            <input type="password" id="Password" name="app_pass" placeholder=" " required>
+                            <label for="Password">Senha</label>
+                        </div>
+
+                        <div class="Login">
+                            <button type="submit" class="btn-login">Entrar</button>
+                        </div>
+                    </form>
+                    <script src="/static/js/login.js" defer></script>
+                </div>
+                <div class="logo-bottom">
+                    <img src="" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

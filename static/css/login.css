@@ -1,0 +1,482 @@
+ body {
+     margin: 0;
+     font-family: sans-serif;
+     color: #0068BB;
+     overflow: hidden;
+ }
+
+ body * {
+     box-sizing: border-box;
+ }
+
+ .container {
+     width: 100%;
+     height: 100vh;
+     overflow: hidden;
+ }
+
+ .container::before {
+     content: "";
+     position: absolute;
+     height: 2000px;
+     width: 2000px;
+     top: -10%;
+     right: 48%;
+     transform: translateY(-50%);
+     background-image: linear-gradient(-45deg, #121260 0%, #04befe 100%);
+     transition: 1.8s ease-in-out;
+     border-radius: 50%;
+     z-index: 0;
+ }
+
+ .main-login {
+     width: 100vw;
+     height: 100vh;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     position: relative;
+     z-index: 2;
+ }
+
+ .left-login {
+     width: 50%;
+     height: 100vh;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     flex-direction: column;
+     color: white;
+     padding: 20px;
+     text-align: center;
+
+ }
+
+ .left-login img {
+     position: absolute;
+     width: 500px;
+     margin-top: 400px;
+     margin-left: 200px;
+ }
+
+ .img-deco {
+     position: absolute;
+     left: -120px;
+     top: 0;
+     width: 500px;
+     height: 418px;
+     z-index: 1;
+     pointer-events: none;
+ }
+
+ .img-deco .icon {
+     position: absolute;
+     width: 500px;
+     height: 418px;
+     opacity: 0.10;
+ }
+
+ .icon-1 {
+     top: -60px;
+ }
+
+ .icon-2 {
+     top: 185px;
+ }
+
+ .icon-3 {
+     top: 450px;
+ }
+
+ .icon-4 {
+     display: none;
+ }
+
+ form {
+     width: 100%;
+     max-width: 400px;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     margin: 0 auto;
+ }
+
+ form h1 {
+     font-size: 24px;
+     margin-bottom: 20px;
+     color: #555353;
+ }
+
+ .right-login {
+     width: 50vw;
+     height: 100vh;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     padding: 20px;
+     position: relative;
+ }
+
+ .logo-bottom {
+     position: absolute;
+     bottom: 20px;
+     right: 20px;
+ }
+
+ .logo-bottom img {
+     width: 90px;
+     opacity: 0.9;
+ }
+
+ .Login {
+     width: 100%;
+     margin-bottom: 15px;
+     position: relative;
+ }
+
+ .Login>input {
+     width: 400px;
+     padding: 14px 16px;
+     border: 1px solid #ccc;
+     border-radius: 6px;
+     font-size: 16px;
+     box-sizing: border-box;
+     transition: border-color 0.3s ease;
+ }
+
+ input:focus {
+     border-color: #0068BB;
+     outline: none;
+ }
+
+ .Login input:focus+label,
+ .Login input:not(:placeholder-shown)+label {
+     top: -8px;
+     left: 8px;
+     font-size: 12px;
+     color: #0068BB;
+ }
+
+ .titulo {
+     padding-right: 130px;
+     margin-bottom: 10px;
+ }
+
+ .titulo h1,
+ p {
+     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+ }
+
+ .titulo p {
+     font-size: 17px;
+     color: #ffffff;
+     line-height: 1.6;
+     max-width: 420px;
+     text-align: left;
+     font-family: inherit;
+     margin-top: -15px;
+ }
+
+ .titulo .final {
+     text-align: center;
+     margin-right: 50px;
+
+ }
+
+ .Login>label {
+     margin-bottom: 10px;
+     color: rgb(78, 78, 78);
+     font-size: 16px;
+     left: 10px;
+     top: 14px;
+     position: absolute;
+     pointer-events: none;
+     transition: all 0.2s ease-out;
+     background-color: white;
+     padding: 0 4px;
+ }
+
+ .Login>input::placeholder {
+     color: #353535;
+ }
+
+ .btn-login {
+     width: 100%;
+     padding: 16px;
+     margin-top: 20px;
+     border: none;
+     border-radius: 8px;
+     background-color: #0D5099;
+     color: aliceblue;
+     font-size: 16px;
+     box-shadow: 0px 10px 40px -12px #00000056;
+     transition: background-color 0.3s ease;
+ }
+
+ button:hover {
+     background-color: #146ac5;
+     color: white;
+     cursor: pointer;
+ }
+
+ .Login>input::selection {
+     background: transparent;
+     color: inherit;
+ }
+
+ /* =============================================
+   RESPONSIVO — TABLET (768px – 1024px)
+   ============================================= */
+
+ @media (max-width: 1024px) {
+     .container::before {
+         width: 1400px;
+         height: 1400px;
+         top: -5%;
+         right: 44%;
+     }
+
+     .left-login img {
+         width: 320px;
+         margin-left: 80px;
+         margin-top: 320px;
+     }
+
+     .titulo {
+         padding-right: 40px;
+     }
+
+     .titulo p {
+         font-size: 15px;
+         max-width: 300px;
+     }
+
+     .Login>input {
+         width: 100%;
+         max-width: 340px;
+     }
+
+     form {
+         max-width: 340px;
+     }
+
+     .img-deco {
+         left: -80px;
+         width: 380px;
+         height: 340px;
+     }
+
+     .img-deco .icon {
+         width: 380px;
+         height: 340px;
+     }
+
+      .icon-3 {
+         display: none;
+     }
+ }
+
+ /* =============================================
+   RESPONSIVO — MOBILE (< 768px)
+   ============================================= */
+ @media (max-width: 767px) {
+     body {
+         overflow-y: auto;
+     }
+
+     .container {
+         height: auto;
+         min-height: 100vh;
+         overflow: visible;
+     }
+
+     .container::before {
+         width: 900px;
+         height: 900px;
+         top: auto;
+         right: auto;
+         left: 50%;
+         top: -20%;
+         transform: translateX(-50%);
+     }
+
+     .main-login {
+         flex-direction: column;
+         height: auto;
+         min-height: 100vh;
+         padding-bottom: 40px;
+     }
+
+     /* Lado esquerdo vira um header no topo */
+     .left-login {
+         width: 100%;
+         height: auto;
+         min-height: 220px;
+         padding: 50px 24px 30px;
+         justify-content: flex-end;
+         align-items: flex-start;
+     }
+
+     .left-login img {
+         display: none;
+     }
+
+     .img-deco {
+         display: none;
+     }
+
+     .titulo {
+         padding-right: 0;
+         margin-bottom: 0;
+         text-align: left;
+     }
+
+     .titulo h1 {
+         font-size: 26px;
+         margin-bottom: 6px;
+     }
+
+     .titulo p {
+         font-size: 14px;
+         max-width: 100%;
+         text-align: left;
+         margin-top: -8px;
+     }
+
+     .titulo .final {
+         text-align: left;
+         margin-right: 0;
+     }
+
+     /* Lado direito ocupa toda a largura */
+     .right-login {
+         width: 100%;
+         height: auto;
+         padding: 32px 24px 80px;
+         background: white;
+         border-radius: 28px 28px 0 0;
+         box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12);
+         position: relative;
+         z-index: 3;
+     }
+
+     form {
+         width: 100%;
+         max-width: 100%;
+     }
+
+     form h1 {
+         font-size: 22px;
+         margin-bottom: 16px;
+     }
+
+     .Login {
+         width: 100%;
+     }
+
+     .Login>input {
+         width: 100%;
+     }
+
+     .btn-login {
+         width: 100%;
+         padding: 14px;
+     }
+
+     .logo-bottom {
+         position: fixed;
+         bottom: 16px;
+         right: 16px;
+     }
+
+     .logo-bottom img {
+         width: 70px;
+     }
+ }
+
+ /* =============================================
+   RESPONSIVO — MOBILE PEQUENO (< 400px)
+   ============================================= */
+ @media (max-width: 400px) {
+     .container::before {
+         width: 700px;
+         height: 700px;
+         top: -15%;
+     }
+
+     .left-login {
+         min-height: 180px;
+         padding: 40px 16px 24px;
+     }
+
+     .titulo h1 {
+         font-size: 22px;
+     }
+
+     .right-login {
+         padding: 24px 16px 70px;
+     }
+
+     form h1 {
+         font-size: 20px;
+     }
+ }
+
+ /* =============================================
+   RESPONSIVO — TELAS GRANDES (> 1400px)
+   ============================================= */
+ @media (min-width: 1700px) {
+     .container::before {
+         width: 2400px;
+         height: 2400px;
+         right: 49%;
+     }
+
+     .left-login img {
+         width: 600px;
+         margin-left: 260px;
+         margin-top: 590px;
+     }
+
+     .Login>input {
+         width: 440px;
+     }
+
+     form {
+         max-width: 440px;
+     }
+
+     .titulo p {
+         font-size: 19px;
+         max-width: 480px;
+     }
+
+     .icon-4 {
+         display: block;
+         top: 700px;
+     }
+
+ }
+
+.meu-alerta-popup {
+    background-color: #ffffff !important;
+    color: rgb(0, 0, 0) !important;
+    border-radius: 12px !important;
+}
+
+.meu-alerta-titulo {
+    color: #0D5099 !important;
+}
+
+.meu-alerta-botao {
+    background-color:#0D5099 !important;
+    border-radius: 8px !important;
+}
+
+.swal2-icon.swal2-error {
+    border-color: #ff0000 !important;
+}
+
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    background-color: #db0000 !important;
+}
