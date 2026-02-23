@@ -78,9 +78,8 @@ def cotation_page():
 def login():
     user = request.form.get('app_user')
     passw = request.form.get('app_pass')
-    company = request.form.get('app_company')
 
-    if user == os.getenv('APP_USER') and passw == os.getenv('APP_PASS') and company == os.getenv('APP_COMPANY'):
+    if user == os.getenv('APP_USER') and passw == os.getenv('APP_PASS'):
         session.clear()
         session.permanent = True
         session["user_ok"] = True

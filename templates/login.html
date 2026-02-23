@@ -1,69 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autenticação</title>
-    <link rel="stylesheet" href="/static/css/login.css">
+    <title>Oportunidades - Login</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
-    <div class="img-deco">
-        <img src="/static/img/grafico.svg" class="icon icon-1" />
-        <img src="/static/img/grafico.svg" class="icon icon-2" />
-        <img src="/static/img/grafico.svg" class="icon icon-3" />
-        <img src="/static/img/grafico.svg" class="icon icon-4" />
-    </div>
 
-    <div class="container">
-        <div class="main-login">
-            <div class="left-login">
-                <div class="titulo">
-                    <h1>Seja bem-vindo!</h1>
-                    <p>
-                        Utilize suas credenciais SAP para acessar o sistema de cotações interativo.
-                        Consulte as cotações do banco de dados, crie concorrentes e atualize informações
-                    </p>
-                    <p class="final">
-                        com facilidade.
-                    </p>
+    <div class="vh-100 position-relative">
+        <div class="position-absolute start-50 translate-middle-x"
+             style="top: 70px; z-index: 10;">
+            <img src="{{ url_for('static', filename='img/logo.png') }}"
+                 alt="logo"
+                 class="img-fluid"
+                 style="max-width: 220px;">
+        </div>
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <form id="loginForm" class="w-100 d-flex justify-content-center">
+                <div class="card shadow-lg border-0 p-4"
+                     style="width: 400px; border-radius: 20px;">
+                    <div class="card-body">
+                        <div class="mb-4 text-start">
+                            <label class="form-label">Usuário:</label>
+                            <div class="input-group">
+                                <input type="text"
+                                       name="app_user"
+                                       class="form-control border-0 border-bottom"
+                                       placeholder="Suporte">
+                                <span class="input-group-text bg-white border-0 border-bottom">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-4 text-start">
+                            <label class="form-label">Senha:</label>
+                            <div class="input-group">
+                                <input type="password"
+                                       id="senha"
+                                       name="app_pass"
+                                       class="form-control border-0 border-bottom"
+                                       placeholder="*******">
+
+                                <span class="input-group-text bg-white border-0 border-bottom"
+                                      style="cursor: pointer;"
+                                      onclick="toggleSenha()">
+                                    <i id="iconeSenha" class="bi bi-eye-slash"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit"
+                                    class="btn btn-info rounded-pill py-2 text-white">
+                                ENTRAR
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <img src="/static/img/persons.svg" />
-            </div>
-            <div class="right-login">
-                <div class="card">
-                    <form id="loginForm">
-                        <h1>Acessar</h1>
-
-                        <div class="Login">
-                            <input type="text" id="Company" name="app_company" placeholder=" " required>
-                            <label for="Company">Nome Empresa</label>
-                        </div>
-
-                        <div class="Login">
-                            <input type="text" id="User" name="app_user" placeholder=" " required>
-                            <label for="User">Usuário</label>
-                        </div>
-
-                        <div class="Login">
-                            <input type="password" id="Password" name="app_pass" placeholder=" " required>
-                            <label for="Password">Senha</label>
-                        </div>
-
-                        <div class="Login">
-                            <button type="submit" class="btn-login">Entrar</button>
-                        </div>
-                    </form>
-                    <script src="/static/js/login.js" defer></script>
-                </div>
-                <div class="logo-bottom">
-                    <img src="" />
-                </div>
-            </div>
+            </form>
         </div>
     </div>
-</body>
 
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
+</body>
 </html>

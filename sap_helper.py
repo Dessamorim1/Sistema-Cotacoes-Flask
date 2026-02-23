@@ -14,6 +14,5 @@ def get_sap() -> SapServiceLayer:
                 if not sap.login():
                     raise ConnectionError("Falha ao autenticar no SAP Service Layer.")
                 _sap_instance = sap
-                print("Instância SAP id:", id(_sap_instance))
 
     return _sap_instance
