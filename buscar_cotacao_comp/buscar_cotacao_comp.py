@@ -24,7 +24,7 @@ def buscar_cotacao_comp():
     
     try:
         sap = get_sap()
-        res= sap.get_endpoint(f'U_OQUTCOMP?$filter=U_DocNum eq {DocNum_int}')
+        res= sap.get_endpoint(f'U_OQUTCOMP?$filter=U_DocNum eq {DocNum_int}&$orderby=U_LineNum asc,U_Posicao asc')
         if_not_ok(res)
         resultado = res.get('data', [])
 

@@ -21,7 +21,7 @@ def criar_concorrente():
 
     def add(campo):
         valor = dados.get(campo)
-        if valor not in (None, "", 0):
+        if valor not in (None, ""):
             linha[campo] = valor
 
     for campo in [

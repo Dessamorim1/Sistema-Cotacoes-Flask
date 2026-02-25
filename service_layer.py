@@ -102,7 +102,7 @@ class SapServiceLayer:
 
             return {"ok": False, "status_code": status, "data": payload_erro}
 
-    def patch_endpoint(self, endpoint: str, payload: Dict) ->  dict:
+    def patch_endpoint(self, endpoint: str, payload: Dict) -> dict:
         headers = {
             "Content-Type": "application/json",
             "B1S-ReplaceCollectionsOnPatch": "false"
@@ -113,17 +113,24 @@ class SapServiceLayer:
             status_code = response.status_code
 
             if status_code in (200, 204):
-                logger.info(f"PATCH realizado com sucesso em: {endpoint}")    
-                return {"ok": True,"status_code": status_code}
-            
+                data = None
+                if status_code == 200:
+                    try:
+                        data = response.json()
+                    except ValueError:
+                        data = response.text or None
+
+                logger.info(f"PATCH realizado com sucesso em: {endpoint} (HTTP {status_code})")
+                return {"ok": True, "status_code": status_code, "data": data}
+
             try:
-               payload_erro = response.json()
+                payload_erro = response.json()
             except ValueError:
                 payload_erro = response.text
 
-            logger.error(f"Erro HTTP {response.status_code} ao fazer PATCH em {endpoint}: " f"{response.text}")
-            return {"ok": False, "status_code": status_code, "data": None}
-        
+            logger.error(f"Erro HTTP {status_code} ao fazer PATCH em {endpoint}: {payload_erro}")
+            return {"ok": False, "status_code": status_code, "data": payload_erro}
+
         except requests.exceptions.RequestException as e:
             resp = getattr(e, "response", None)
             status_code = resp.status_code if resp is not None else 500
@@ -136,7 +143,9 @@ class SapServiceLayer:
             else:
                 payload_erro = str(e)
 
-            logger.exception(f"Falha de comunicação ao fazer PATCH em {endpoint} (HTTP {status_code}): {payload_erro}")
+            logger.exception(
+                f"Falha de comunicação ao fazer PATCH em {endpoint} (HTTP {status_code}): {payload_erro}"
+            )
             return {"ok": False, "status_code": status_code, "data": payload_erro}
         
     def post_endpoint(self, endpoint: str, payload: Dict):

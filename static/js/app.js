@@ -514,10 +514,20 @@ async function criar_concorrente() {
             return;
         }
 
+        const itemValue = document.getElementById("ItemCotacao").value;
+
+        if (itemValue === "") {
+            alerta('warning', 'Item obrigatório', 'Selecione o item da cotação.');
+            btn.disabled = false;
+            return;
+        }
+
+        const lineNum = Number(itemValue);
+
         const concorrente = {
             U_DocNum: DocNum,
-            U_LineNum: document.getElementById("ItemCotacao").value.trim(),
-            U_ComptID: concorrente_id,
+            U_LineNum: lineNum,
+            U_ComptID: Number(concorrente_id),
             U_ThreatLevel: document.getElementById("U_ThreatLevel").value.trim(),
             U_Marca: document.getElementById("U_Marca").value.trim(),
             U_Modelo: document.getElementById("U_Modelo").value.trim(),
@@ -637,6 +647,13 @@ async function atualizar_concorrente() {
         );
     }
 
+    const lineValue = linhaSelecionada[10].querySelector("select").value;
+
+    if (lineValue === "") {
+        await alerta('warning', 'Item obrigatório', 'Selecione o item da cotação.');
+        return;
+    }
+
     let concorrenteAtualizado;
     try {
         concorrenteAtualizado = {
@@ -648,14 +665,14 @@ async function atualizar_concorrente() {
             U_Quantidade: validarNumero(linhaSelecionada[6].querySelector("input"), "Quantidade"),
             U_ValorUnit: validarNumero(linhaSelecionada[7].querySelector("input"), "Valor Unitário"),
             U_ValorTot: validarNumero(linhaSelecionada[8].querySelector("input"), "Valor Total"),
-            U_Posicao: linhaSelecionada[9].querySelector("input").value.trim(),
-            U_LineNum: linhaSelecionada[10].querySelector("select").value
+            U_Posicao: validarNumero(linhaSelecionada[9].querySelector("input"), "Posição"),
+            U_LineNum: Number(lineValue)
 
         };
 
     } catch (err) {
         await alerta('warning', 'Campo inválido', err.message);
-        return
+        return;
     }
     try {
         const resp = await apiFetch(`/api/atualizar_concorrente/${CodeSelecionado}`, {

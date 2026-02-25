@@ -1,5 +1,6 @@
 from exceptions import SAPError
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -32,3 +33,18 @@ def if_not_ok(res):
         code = (erro_sap.get("error") or {}).get("code")
 
     raise SAPError(mensagem, status,code)
+
+def traducao_mensagem_erro(code, mensagem):
+    campo = None
+
+    if code == -1:
+        match = re.search(r"property '([^']+)'", mensagem)
+        if match:
+            campo = match.group(1)
+
+    traducao = {
+        -2028: "Nenhum registro encontrado.",
+        -1: f"O valor do campo {campo} está muito longo." if campo else "Valor muito longo."
+    }
+
+    return traducao.get(code, mensagem)

@@ -4,9 +4,9 @@ import os
 
 from dotenv import load_dotenv
 from waitress import serve
-from datetime import datetime, timezone,timedelta
+from datetime import timedelta
 from exceptions import SAPError
-from sap_helper import get_sap
+from tratamento_sap import traducao_mensagem_erro
 
 from atualizar_concorrentes.atualizar_concorrente import atualizar_concorrente_blueprint
 from atualizar_info_cotacao.atualizar_info_cotacao import atualizar_info_cotacao_blueprint
@@ -61,7 +61,9 @@ def refresh_session():
 
 @app.errorhandler(SAPError)
 def handle_sap_error(e):
-    return jsonify({"erro": e.mensagem, "code": e.code}), e.status_code
+    msg = traducao_mensagem_erro(e.code, e.mensagem)
+
+    return jsonify({"erro": msg,"code": e.code}), e.status_code
 
 @app.route('/')
 def home():
