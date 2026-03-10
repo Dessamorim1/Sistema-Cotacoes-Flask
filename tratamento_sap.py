@@ -37,14 +37,17 @@ def if_not_ok(res):
 def traducao_mensagem_erro(code, mensagem):
     campo = None
 
-    if code == -1:
+    if code == -1 and mensagem != "unknow erro":
         match = re.search(r"property '([^']+)'", mensagem)
         if match:
             campo = match.group(1)
 
     traducao = {
         -2028: "Nenhum registro encontrado.",
-        -1: f"O valor do campo {campo} está muito longo." if campo else "Valor muito longo."
+        1: "Erro desconhecido" if mensagem == "unknow erro" else mensagem,
     }
+
+    if code == -1 and campo:
+        traducao[-1] = f"O valor do campo {campo} está muito longo."
 
     return traducao.get(code, mensagem)
