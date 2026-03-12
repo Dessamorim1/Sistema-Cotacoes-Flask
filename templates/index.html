@@ -6,18 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cotações Competidores</title>
 
-     <!-- CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <!-- JS -->
     <script src="/static/js/app.js"></script>
-   
+
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- Icones -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 
     <!-- BootStrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -341,6 +343,32 @@
                                             </div>
                                             <div class="col-xl-9 field">
                                                 <select id="ItemCotacao">
+                                                    <option value="">Selecione</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- // Fazer modal -->
+                                    <p>Deseja adicionar um item que não esteja na cotação?</p>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Filtro do Item</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="U_FOC_GRP">
+                                                    <option value="">Carregando itens...</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inputs-form">
+                                        <div class="row alg">
+                                            <div class="col-xl-3 label">
+                                                <label>Item</label>
+                                            </div>
+                                            <div class="col-xl-9 field">
+                                                <select id="">
                                                     <option value="">Selecione</option>
                                                 </select>
                                             </div>

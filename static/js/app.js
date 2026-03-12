@@ -9,6 +9,7 @@ let payload = []
 
 window.addEventListener('load', () => {
     carregar_concorrentes();
+    carregar_filtro_itens();
     GerarLinhas();
     pegar_linha();
 })
@@ -193,6 +194,35 @@ async function carregar_itens(DocNum) {
     }
 }
 
+async function carregar_filtro_itens() {
+    try {
+        const response = await fetch('/api/buscar_filtro_itens');
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar itens da cotação');
+        }
+
+        const lista = await response.json();
+        // itensCadastrados = lista;
+
+        const itens = document.getElementById("U_FOC_GRP");
+        if (!itens) return;
+        itens.innerHTML = '<option value="">Selecione</option>';
+        lista.forEach(c => {
+            const option = document.createElement("option");
+            option.value = c.Code;
+            option.textContent = c.Name;
+            itens.appendChild(option);
+        });
+
+    } catch (err) {
+        alerta(
+            'error',
+            'Erro ao carregar itens',
+            err.message || 'Não foi possível carregar o filtro de itens da cotação.'
+        );
+    }
+}
 
 // Buscar Cotação
 
