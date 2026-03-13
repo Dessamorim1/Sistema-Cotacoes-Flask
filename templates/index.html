@@ -24,6 +24,11 @@
     <!-- BootStrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Configurações de Selects e filtros -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 </head>
 
 <body>
@@ -349,34 +354,14 @@
                                         </div>
                                     </div>
                                     <!-- // Fazer modal -->
-                                    <p>Deseja adicionar um item que não esteja na cotação?</p>
-                                    <div class="inputs-form">
-                                        <div class="row alg">
-                                            <div class="col-xl-3 label">
-                                                <label>Filtro do Item</label>
-                                            </div>
-                                            <div class="col-xl-9 field">
-                                                <select id="U_FOC_GRP">
-                                                    <option value="">Carregando itens...</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="inputs-form">
-                                        <div class="row alg">
-                                            <div class="col-xl-3 label">
-                                                <label>Item</label>
-                                            </div>
-                                            <div class="col-xl-9 field">
-                                                <select id="">
-                                                    <option value="">Selecione</option>
-                                                </select>
-                                            </div>
-                                        </div>
+                                    <div class="question">
+                                        <p>Deseja adicionar um item que não esteja na cotação?</p>
+                                        <button type="button" class="btnAbrirItens">
+                                            <i class="ph ph-arrow-square-in"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </form>
                 </div>
             </section>
@@ -446,6 +431,39 @@
             <input type="text" id="nomeCompetidor" required />
             <button type="button" id="btnmodal" onclick="criarConcorrente()">Salvar</button>
             <p>O nome só pode possuir 15 caracteres.</p>
+        </div>
+    </div>
+ <!-- Modal de itens -->
+    <div id="Modal-Itens">
+        <div class="modal-content">
+            <button type="button" class="btnFecharItens">
+                <i class="ph ph-x"></i>
+            </button>
+            <div class="inputs-form">
+                <div class="row alg">
+                    <div class="col-xl-3 label">
+                        <label>Filtro do Item</label>
+                    </div>
+                    <div class="col-xl-9 field">
+                        <select id="U_FOC_GRP">
+                            <option value="">Carregando itens...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="inputs-form">
+                <div class="row alg">
+                    <div class="col-xl-3 label">
+                        <label>Item</label>
+                    </div>
+                    <div class="col-xl-9 field">
+                        <select id="Item_Filtrado">
+                            <option value="">Selecione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </body>

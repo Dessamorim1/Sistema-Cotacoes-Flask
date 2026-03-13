@@ -708,32 +708,104 @@ body.dark .meu-alerta-botao {
 }
 
 body.dark .logout-popup {
-    background: #212121  !important;
-    color: #e4e6eb !important;
-    border-radius: 16px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  background: #212121 !important;
+  color: #e4e6eb !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 body.dark .logout-popup .swal2-title {
-    color: #4dabf7 !important; 
+  color: #4dabf7 !important;
 }
 
 body.dark .logout-popup .swal2-html-container {
-    color: #cfd8dc !important;
+  color: #cfd8dc !important;
 }
 
 body.dark .logout-popup .swal2-confirm {
-    background-color: #4dabf7 !important;
-    border: none !important;
+  background-color: #4dabf7 !important;
+  border: none !important;
 }
 
 body.dark .logout-popup .swal2-cancel {
-    background-color: #495057 !important;
-    border: none !important;
-    border-radius: 8px !important;
+  background-color: #495057 !important;
+  border: none !important;
+  border-radius: 8px !important;
 }
 
 body.dark .logout-popup .swal2-icon.swal2-question {
-    border-color: #4dabf7  !important;
-    color: #4dabf7  !important;
+  border-color: #4dabf7 !important;
+  color: #4dabf7 !important;
+}
+
+/* Question Modal */
+
+.question {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.question p {
+  margin: 0;
+}
+
+.question button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Fundo do modal */
+#Modal-Itens {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Caixa do modal */
+#Modal-Itens .modal-content{
+    position: relative;
+    background: #fff;
+    padding: 45px 25px 25px 25px; 
+    border-radius: 8px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Inputs dentro do modal */
+#Modal-Itens .inputs-form {
+  margin-bottom: 15px;
+}
+
+.btnFecharItens {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* animação */
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

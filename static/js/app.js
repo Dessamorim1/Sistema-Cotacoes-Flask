@@ -7,30 +7,41 @@ let payload = []
 
 // Listeners
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Carregamentos iniciais
     carregar_concorrentes();
-    carregar_filtro_itens();
     GerarLinhas();
     pegar_linha();
-})
+    abrirModal_Items();
 
-document.addEventListener('DOMContentLoaded', () => {
+    // Elementos
     const unit = document.getElementById("U_ValorUnit");
     const qtd = document.getElementById("U_Quantidade");
+    const total = document.getElementById("U_ValorTot");
 
-    if (unit) unit.addEventListener("input", (e) => {
-        formatarMoeda(e.target);
-        calcular_total();
-    });
+    // Eventos
+    if (unit) {
+        unit.addEventListener("input", (e) => {
+            formatarMoeda(e.target);
+            calcular_total();
+        });
 
-    if (qtd) qtd.addEventListener("input", calcular_total);
-});
+        unit.addEventListener("keypress", (e) => {
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+    }
 
-document.getElementById('U_ValorUnit').addEventListener('keypress', e => {
-    if (!/[0-9]/.test(e.key)) e.preventDefault();
-});
-document.getElementById('U_ValorTot').addEventListener('keypress', e => {
-    if (!/[0-9]/.test(e.key)) e.preventDefault();
+    if (qtd) {
+        qtd.addEventListener("input", calcular_total);
+    }
+
+    if (total) {
+        total.addEventListener("keypress", (e) => {
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+    }
+
 });
 
 // Toglled night and day
@@ -194,7 +205,7 @@ async function carregar_itens(DocNum) {
     }
 }
 
-async function carregar_filtro_itens() {
+async function carregar_filtro_itens(selectId, onChangeCallback) {
     try {
         const response = await fetch('/api/buscar_filtro_itens');
 
@@ -205,7 +216,7 @@ async function carregar_filtro_itens() {
         const lista = await response.json();
         // itensCadastrados = lista;
 
-        const itens = document.getElementById("U_FOC_GRP");
+        const itens = document.getElementById(selectId);
         if (!itens) return;
         itens.innerHTML = '<option value="">Selecione</option>';
         lista.forEach(c => {
@@ -215,12 +226,83 @@ async function carregar_filtro_itens() {
             itens.appendChild(option);
         });
 
+        if (onChangeCallback) {
+            itens.addEventListener("change", () => {
+                onChangeCallback(itens.value);
+            });
+        }
+
     } catch (err) {
         alerta(
             'error',
             'Erro ao carregar itens',
             err.message || 'Não foi possível carregar o filtro de itens da cotação.'
         );
+    }
+}
+
+// ===== Carrega itens filtrados =====
+
+async function carregarItensFiltradosGenerico(selectId, code, inputAtivo = null) {
+    const $select = $('#' + selectId);
+    $select.empty().append('<option>Carregando...</option>');
+
+    if (!code) {
+        $select.empty().append('<option value="">Selecione</option>');
+        if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
+        return;
+    }
+
+    try {
+        const lista = await apiFetchJson(
+            `/api/buscar_itens_filtrados?U_FOC=${encodeURIComponent(code)}`
+        );
+        if (!lista) return;
+
+        todos_itens_safe = lista;
+
+        $select.empty().append('<option value="">Selecione</option>');
+
+        if (!Array.isArray(lista) || lista.length === 0) {
+            $select.append('<option value="">Nenhum item</option>');
+            if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
+            alerta('error', 'Nenhum item encontrado', 'Não existe nenhum item com esse tipo.');
+            return;
+        }
+
+        lista.forEach(item => {
+            $select.append(new Option(item.ItemName, item.ItemCode));
+        });
+
+        if ($select.hasClass("select2-hidden-accessible")) {
+            $select.trigger('change');
+        } else {
+            $select.select2({
+                placeholder: 'Digite para filtrar...',
+                allowClear: true,
+                width: 'resolve'
+            });
+        }
+
+        if (inputAtivo) {
+            $select.off('select2:select').on('select2:select', function (e) {
+                const selecionado = e.params.data;
+                inputAtivo.value = selecionado.id || '';
+                fecharModal_Items();
+            });
+
+            $select.off('select2:clear').on('select2:clear', function () {
+                inputAtivo.value = '';
+            });
+        }
+
+        if (lista.length === 1) {
+            $select.val(lista[0].ItemCode).trigger('change');
+        }
+
+    } catch (err) {
+        console.error(err);
+        mensagem_erro(err, 'Erro ao carregar itens');
     }
 }
 
@@ -950,4 +1032,42 @@ async function chamar_logout() {
     }
 }
 
+// Modal Items
 
+function abrirModal_Items() {
+
+    const btnAbrir = document.querySelector(".btnAbrirItens");
+    const modal = document.getElementById("Modal-Itens");
+
+    if (!btnAbrir || !modal) return;
+
+    btnAbrir.addEventListener("click", (e) => {
+
+        e.preventDefault();
+
+        modal.style.display = "flex";
+
+        carregar_filtro_itens("U_FOC_GRP", (code) => {
+            carregarItensFiltradosGenerico("Item_Filtrado", code);
+        });
+
+    });
+
+    fecharModal_Items();
+}
+
+function fecharModal_Items() {
+
+    const btnFechar = document.querySelector(".btnFecharItens");
+    const modal = document.getElementById("Modal-Itens");
+
+    if (!btnFechar || !modal) return;
+
+    btnFechar.addEventListener("click", (e) => {
+
+        e.preventDefault();
+        modal.style.display = "none";
+
+    });
+
+}
