@@ -1,9 +1,11 @@
 let concorrentesCadastrados = [];
 let itensCadastrados = [];
+let codigosItens = [];
 let nomes = [];
 let CodeSelecionado = null;
 let linhaSelecionada = null;
-let payload = []
+let payload = [];
+let itensFora_cotacao = [];
 
 // Listeners
 
@@ -13,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     carregar_concorrentes();
     GerarLinhas();
     pegar_linha();
-    abrirModal_Items();
 
     // Elementos
     const unit = document.getElementById("U_ValorUnit");
@@ -103,6 +104,7 @@ function GerarLinhas(qtd = 50) {
         <div>V. Total</div>
         <div>Posição</div>
         <div>Item Safe</div>
+        <div>Item Fora</div>
     `;
 
     for (let i = 0; i < qtd; i++) {
@@ -131,6 +133,12 @@ function GerarLinhas(qtd = 50) {
             <div><select class="items-safe">
                 <option value=""></option>
                 </select>
+            </div>
+             <div class="item-fora" style="display:flex; align-items:center; gap:4px;">
+            <input type="text" class="nome-item" readonly style="flex:1;" />
+            <button type="button" onclick="abrirModalItemSafe(this)" style="padding:2px 6px;"><i
+            class="ph-fill ph-arrow-fat-right modal-arrow"
+            style="color: #a4b7c1"></i></button>
             </div>
         `);
     }
@@ -184,17 +192,38 @@ async function carregar_itens(DocNum) {
 
         const lista = await response.json();
         itensCadastrados = lista;
-        console.log(itensCadastrados)
 
         const itens = document.getElementById("ItemCotacao");
-        if (!itens) return;
+        const modal = document.getElementById("itens-session");
+
+        if (!itens || !modal) return;
         itens.innerHTML = '<option value="">Selecione</option>';
+
         lista.forEach(c => {
             const option = document.createElement("option");
+            console.log(c);
             option.value = c.LineNum;
             option.textContent = c.ItemDescription;
             itens.appendChild(option);
         });
+
+        const optionNew = document.createElement("option");
+        optionNew.value = "999";
+        optionNew.textContent = "Item fora da cotação";
+        itens.appendChild(optionNew);
+
+        itens.onchange = function () {
+            if (this.value === "999") {
+                modal.style.display = "block";
+
+                carregar_filtro_itens("U_FOC_GRP", (code) => {
+                    carregarItensFiltradosGenerico("Item_Filtrado", code);
+                });
+
+            } else {
+                modal.style.display = "none";
+            }
+        };
 
     } catch (err) {
         alerta(
@@ -214,21 +243,25 @@ async function carregar_filtro_itens(selectId, onChangeCallback) {
         }
 
         const lista = await response.json();
-        // itensCadastrados = lista;
 
         const itens = document.getElementById(selectId);
         if (!itens) return;
-        itens.innerHTML = '<option value="">Selecione</option>';
+
+        const $itens = $(itens);
+
+        $itens.off('change');
+        $itens.empty().append('<option value="">Selecione</option>');
+
         lista.forEach(c => {
-            const option = document.createElement("option");
-            option.value = c.Code;
-            option.textContent = c.Name;
+            const option = new Option(c.Name, c.Code, false, false);
             itens.appendChild(option);
         });
 
+        $itens.val(null).trigger('change');
+
         if (onChangeCallback) {
-            itens.addEventListener("change", () => {
-                onChangeCallback(itens.value);
+            $itens.on("change", function () {
+                onChangeCallback(this.value);
             });
         }
 
@@ -337,6 +370,8 @@ async function buscar_cotacao() {
         await carregar_itens(DocNum);
         buscar_info_cotacao(document.getElementById("DocEntry").value);
         buscar_linhas_cotacao(DocNum);
+        const modal = document.getElementById("itens-session");
+        modal.style.display = "none";
 
     } catch (err) {
         mensagem_erro(err, "Erro ao buscar Cotação")
@@ -350,20 +385,30 @@ async function buscar_linhas_cotacao(DocNum) {
 
     const linhas = document.querySelectorAll(".concorrentes-grid div input, .concorrentes-grid div select");
 
-    for (let i = 0; i < linhas.length; i += 11) {
-        const camposLinha = Array.from(linhas).slice(i, i + 11);
+    for (let i = 0; i < linhas.length; i += 12) {
+        const camposLinha = Array.from(linhas).slice(i, i + 12);
 
         camposLinha[0].value = "";
+
         camposLinha[1].innerHTML = '<option value=""></option>';
-        camposLinha[2].innerHTML = '<option value=""></option><option value="Low">Baixo</option><option value="Medium">Médio</option><option value="High">Alto</option>';
+
+        camposLinha[2].innerHTML = `
+            <option value=""></option>
+            <option value="Low">Baixo</option>
+            <option value="Medium">Médio</option>
+            <option value="High">Alto</option>
+        `;
+
         for (let j = 3; j < 10; j++) {
             if (camposLinha[j]) camposLinha[j].value = "";
         }
-        camposLinha[10].value = '<option value=""></option>';
+
+        camposLinha[10].innerHTML = '<option value=""></option>';
     }
 
     try {
         const res = await fetch(`/api/buscar_cotacao_comp?DocNum=${encodeURIComponent(DocNum)}`);
+
         if (!res.ok) {
             let errData = {};
             try { errData = await res.json(); } catch { }
@@ -371,28 +416,39 @@ async function buscar_linhas_cotacao(DocNum) {
         }
 
         const dados = await res.json();
-        if (dados.length === 0) {
-            if (dados.length === 0) {
-                const lista = Array.from(linhas);
-                lista.forEach(campo => {
-                    if (campo.tagName === 'SELECT') {
-                        campo.innerHTML = '';
-                        campo.value = '';
-                    } else {
-                        campo.value = '';
-                    }
-                });
-                return;
-            }
+        console.log(dados.length)
+        if (!dados || dados.length === 0) {
+            const lista = Array.from(linhas);
+            lista.forEach(campo => {
+                if (campo.tagName === 'SELECT') {
+                    campo.innerHTML = '';
+                    campo.value = '';
+                } else {
+                    campo.value = '';
+                }
+            });
+            return;
         }
+
+        //  console.log(dados)
+        // codigosItens
+        dados.forEach(element => {
+            if (element.U_LineNum === '999') {
+                codigosItens.push(element);
+                console.log("FORA COTAÇÃO")
+                console.log(element)
+            }
+        });
+
         const lista = Array.from(linhas);
+
         for (let i = 0; i < dados.length; i++) {
-            const campos = lista.slice(i * 11, (i + 1) * 11);
-            if (campos.length < 11) break;
+            const campos = lista.slice(i * 12, (i + 1) * 12);
+            if (campos.length < 12) break;
+
             const c = dados[i] || {};
 
-            campos[0].value = c.Code
-
+            campos[0].value = c.Code || "";
             const select = campos[1];
             select.innerHTML = '';
             concorrentesCadastrados.forEach(cOpt => {
@@ -402,7 +458,9 @@ async function buscar_linhas_cotacao(DocNum) {
                 select.appendChild(opt);
             });
 
-            const optionSelecionada = Array.from(select.options).find(opt => Number(opt.value) === Number(c.U_ComptID));
+            const optionSelecionada = Array.from(select.options)
+                .find(opt => Number(opt.value) === Number(c.U_ComptID));
+
             select.value = optionSelecionada ? optionSelecionada.value : "";
 
             campos[2].value = c.U_ThreatLevel || '';
@@ -415,17 +473,35 @@ async function buscar_linhas_cotacao(DocNum) {
             campos[9].value = c.U_Posicao || '';
 
             const itemSelect = campos[10];
+            itemSelect.classList.add("select-item");
             itemSelect.innerHTML = '';
+
             itensCadastrados.forEach(dOpt => {
                 const optItem = document.createElement("option");
                 optItem.value = dOpt.LineNum;
                 optItem.text = dOpt.ItemDescription;
                 itemSelect.appendChild(optItem);
             });
-            console.log("to chegando aq assim: ", itensCadastrados)
-            const optionItem = Array.from(itemSelect.options).find(opt1 => Number(opt1.value) === Number(c.U_LineNum));
+
+            const optionNew = document.createElement("option");
+            optionNew.value = "999";
+            optionNew.textContent = "Item fora da cotação";
+            itemSelect.appendChild(optionNew);
+
+            let optionItem = Array.from(itemSelect.options)
+                .find(opt => Number(opt.value) === Number(c.U_LineNum));
+
+            if (Number(c.U_LineNum) === 999) {
+                if (!optionItem) {
+                    optionItem = new Option("Item Fora da cotação", "999");
+                    itemSelect.add(optionItem);
+                } else {
+                    optionItem.text = "Item Fora da cotação";
+                }
+            }
             itemSelect.value = optionItem ? optionItem.value : "";
 
+            campos[11].value = c.U_ItemCode || '';
         }
 
     } catch (err) {
@@ -635,8 +711,16 @@ async function criar_concorrente() {
         }
 
         const lineNum = Number(itemValue);
+        const ItemCode = document.getElementById("Item_Filtrado").value.trim()
 
-        const concorrente = {
+        if (ItemCode === "" && lineNum === 999) {
+            alerta('warning', 'Item obrigatório', 'Selecione o item da cotação.');
+            btn.disabled = false;
+            return;
+        }
+        let concorrente = {};
+
+        concorrente = {
             U_DocNum: DocNum,
             U_LineNum: lineNum,
             U_ComptID: Number(concorrente_id),
@@ -647,8 +731,10 @@ async function criar_concorrente() {
             U_Observacao: document.getElementById("U_Observacao").value.trim(),
             U_Posicao: posicao,
             U_ValorUnit: valorUnit,
-            U_ValorTot: valorTot
+            U_ValorTot: valorTot,
+            U_ItemCode: Number(lineNum) === 999 ? ItemCode : ""
         }
+
         const data = await apiFetchJson('/api/criar_concorrente', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -676,8 +762,8 @@ function pegar_linha() {
     const linhas = document.querySelector(".concorrentes-grid");
     const linha = Array.from(linhas.children);
 
-    for (let i = 11; i < linha.length; i += 11) {
-        payload.push(linha.slice(i, i + 11));
+    for (let i = 12; i < linha.length; i += 12) {
+        payload.push(linha.slice(i, i + 12));
     }
 
     payload.forEach(linha => {
@@ -760,9 +846,26 @@ async function atualizar_concorrente() {
     }
 
     const lineValue = linhaSelecionada[10].querySelector("select").value;
+    const ItemCode = linhaSelecionada[11].querySelector("input").value;
 
-    if (lineValue === "") {
+    const line = Number(lineValue);
+
+    if (!lineValue) {
         await alerta('warning', 'Item obrigatório', 'Selecione o item da cotação.');
+        return;
+    }
+
+    if (line === 999 && !ItemCode) {
+        await alerta('warning', 'Item obrigatório', 'Informe o código do Item.');
+        return;
+    }
+
+    if (line !== 999 && ItemCode) {
+        await alerta(
+            'warning',
+            'Seleção inválida',
+            'Você não pode escolher um item da cotação e um item fora da cotação ao mesmo tempo.'
+        );
         return;
     }
 
@@ -778,8 +881,8 @@ async function atualizar_concorrente() {
             U_ValorUnit: validarNumero(linhaSelecionada[7].querySelector("input"), "Valor Unitário"),
             U_ValorTot: validarNumero(linhaSelecionada[8].querySelector("input"), "Valor Total"),
             U_Posicao: validarNumero(linhaSelecionada[9].querySelector("input"), "Posição"),
-            U_LineNum: Number(lineValue)
-
+            U_LineNum: Number(lineValue),
+            U_ItemCode: Number(lineValue) === 999 ? ItemCode : ""
         };
 
     } catch (err) {
@@ -909,11 +1012,19 @@ function parseValorBR(valor) {
 //Limpar campos
 
 function limpar_campos() {
-    const campos = ["concorrente", "U_ThreatLevel", "U_Marca", "U_Modelo", "U_Observacao", "U_Quantidade", "U_ValorUnit", "U_ValorTot", "U_Posicao", "U_LineNum", "ItemCotacao"]
+    const campos = ["concorrente", "U_ThreatLevel", "U_Marca", "U_Modelo", "U_Observacao", "U_Quantidade", "U_ValorUnit", "U_ValorTot", "U_Posicao", "U_LineNum", "ItemCotacao", "U_FOC_GRP"]
     campos.forEach(id => {
         const elemento = document.getElementById(id);
         if (!elemento) return;
-        elemento.value = "";
+        if ($(elemento).hasClass("select2-hidden-accessible")) {
+            $(elemento)
+                .val(null)
+                .empty()
+                .append('<option value="">Selecione</option>')
+                .trigger('change');
+        } else {
+            elemento.value = "";
+        }
     });
 }
 
@@ -1032,42 +1143,37 @@ async function chamar_logout() {
     }
 }
 
-// Modal Items
 
-function abrirModal_Items() {
+// ===== Modal Itens =====
 
-    const btnAbrir = document.querySelector(".btnAbrirItens");
-    const modal = document.getElementById("Modal-Itens");
+function abrirModalItemSafe(botao) {
+    const linha = botao.closest(".concorrentes-grid");
 
-    if (!btnAbrir || !modal) return;
+    const selects = linha.querySelectorAll(".select-item");
 
-    btnAbrir.addEventListener("click", (e) => {
+    const botoes = linha.querySelectorAll(".item-fora button");
+    const index = Array.from(botoes).indexOf(botao);
 
-        e.preventDefault();
+    const itemSelect = selects[index];
 
-        modal.style.display = "flex";
+    if (Number(itemSelect?.value) != 999) {
+        return alerta('warning', 'Item Safe incorreto', 'Você precisa informar que é um item fora da cotação primeiro.');
+    }
 
-        carregar_filtro_itens("U_FOC_GRP", (code) => {
-            carregarItensFiltradosGenerico("Item_Filtrado", code);
-        });
+    const container = botao.parentElement;
+    inputAtivo = container.querySelector(".nome-item");
 
+    document.getElementById("modalItemSafe").style.display = "flex";
+
+    document.getElementById("ItemsSafeModal").innerHTML = '<option value="">Carregando...</option>';
+    document.getElementById("ItemSafeModal").innerHTML = '<option value="">Selecione</option>';
+
+    carregar_filtro_itens("ItemsSafeModal", (code) => {
+        carregarItensFiltradosGenerico("ItemSafeModal", code, inputAtivo);
     });
-
-    fecharModal_Items();
 }
 
-function fecharModal_Items() {
-
-    const btnFechar = document.querySelector(".btnFecharItens");
-    const modal = document.getElementById("Modal-Itens");
-
-    if (!btnFechar || !modal) return;
-
-    btnFechar.addEventListener("click", (e) => {
-
-        e.preventDefault();
-        modal.style.display = "none";
-
-    });
-
+function fecharModalItemSafe() {
+    document.getElementById("modalItemSafe").style.display = "none";
+    inputAtivo = null;
 }

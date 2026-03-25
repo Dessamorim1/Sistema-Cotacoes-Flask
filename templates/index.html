@@ -340,8 +340,6 @@
                                         </div>
                                     </div>
                                     <div class="inputs-form">
-                                    </div>
-                                    <div class="inputs-form">
                                         <div class="row alg">
                                             <div class="col-xl-3 label">
                                                 <label>Itens Cotação</label>
@@ -353,12 +351,34 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- // Fazer modal -->
-                                    <div class="question">
-                                        <p>Deseja adicionar um item que não esteja na cotação?</p>
-                                        <button type="button" class="btnAbrirItens">
-                                            <i class="ph ph-arrow-square-in"></i>
+                                    <div class="col-12" id="itens-session">
+                                        <button type="button" class="btnFecharItens">
+                                            <i class="ph ph-x"></i>
                                         </button>
+                                        <div class="inputs-form">
+                                            <div class="row alg">
+                                                <div class="col-xl-3 label">
+                                                    <label>Filtro do Item</label>
+                                                </div>
+                                                <div class="col-xl-9 field">
+                                                    <select id="U_FOC_GRP">
+                                                        <option value="">Carregando itens...</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="inputs-form">
+                                            <div class="row alg">
+                                                <div class="col-xl-3 label">
+                                                    <label>Item</label>
+                                                </div>
+                                                <div class="col-xl-9 field">
+                                                    <select id="Item_Filtrado">
+                                                        <option value="">Selecione</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -376,6 +396,61 @@
                     </button>
                 </div>
             </section>
+            <!-- <div class="container-fluid mt-3">
+                <div class="table-responsive custom-table">
+
+                    <table class="table table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Concorrente</th>
+                                <th>Grau de Ameaça</th>
+                                <th>Marca/Fabricante</th>
+                                <th>Modelo</th>
+                                <th>Observação</th>
+                                <th>Qtde.</th>
+                                <th>V. Unitário</th>
+                                <th>V. Total</th>
+                                <th>Posição</th>
+                                <th>Item Safe</th>
+                                <th>Item Fora</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><select class="form-select form-select-sm">
+                                        <option selected disabled>Selecione</option>
+                                        <option value=""></option>
+                                    </select></td>
+                                <td><select class="form-select form-select-sm">
+                                        <option selected disabled>Selecione</option>
+                                        <option value="tlLow">Baixo</option>
+                                        <option value="tlMedium">Médio</option>
+                                        <option value="tlHigh">Alto</option>
+                                    </select></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="link"></td>
+                                <td></td>
+                                <td>
+                                    <select class="form-select form-select-sm items-safe">
+                                        <option selected disabled>Selecione</option>
+                                        <option value=""></option>
+                                    </select>
+                                </td>
+                                <td class="cotacao"> <span class="arrow"></span></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+            </div> -->
             <!-- Aba Concorrentes -->
             <div id="concorrentes" class="tab-content active">
                 <div class="aba-concorrentes">
@@ -391,6 +466,7 @@
                         <div>V. Total</div>
                         <div>Posição</div>
                         <div>Item Safe</div>
+                        <div>Item Fora</div>
 
                         <div><input type="hidden" class="rowno" readonly /></div>
                         <div><select class="grid-select conc">
@@ -417,6 +493,12 @@
                                 <option value=""></option>
                             </select>
                         </div>
+                        <div class="item-fora" style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" class="nome-item" readonly style="flex:1;" />
+                            <button type="button" onclick="abrirModalItemSafe(this)" style="padding:2px 6px;"><i
+                                    class="ph-fill ph-arrow-fat-right modal-arrow"
+                                    style="color: #a4b7c1"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -433,37 +515,26 @@
             <p>O nome só pode possuir 15 caracteres.</p>
         </div>
     </div>
- <!-- Modal de itens -->
-    <div id="Modal-Itens">
+
+    <!-- Modal Item Safe -->
+    <div id="modalItemSafe" class="modal">
         <div class="modal-content">
-            <button type="button" class="btnFecharItens">
-                <i class="ph ph-x"></i>
-            </button>
-            <div class="inputs-form">
-                <div class="row alg">
-                    <div class="col-xl-3 label">
-                        <label>Filtro do Item</label>
-                    </div>
-                    <div class="col-xl-9 field">
-                        <select id="U_FOC_GRP">
-                            <option value="">Carregando itens...</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="inputs-form">
-                <div class="row alg">
-                    <div class="col-xl-3 label">
-                        <label>Item</label>
-                    </div>
-                    <div class="col-xl-9 field">
-                        <select id="Item_Filtrado">
-                            <option value="">Selecione</option>
-                        </select>
-                    </div>
-                </div>
+            <span class="close" onclick="fecharModalItemSafe()">&times;</span>
+            <h3>Selecionar Item Safe</h3>
+
+            <div class="form-row-end">
+                <label>Selecione o Tipo do item:</label>
+                <select id="ItemsSafeModal" required>
+                    <option value="">Carregando itens...</option>
+                </select>
             </div>
 
+            <div class="form-row-end">
+                <label>Item Safe</label>
+                <select id="ItemSafeModal">
+                    <option value="">Selecione</option>
+                </select>
+            </div>
         </div>
     </div>
 </body>

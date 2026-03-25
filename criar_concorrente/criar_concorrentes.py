@@ -36,7 +36,8 @@ def criar_concorrente():
         "U_Posicao",
         "U_ValorUnit",
         "U_ValorTot",
-        "U_DocNum"
+        "U_DocNum",
+        "U_ItemCode"
     ]:
         add(campo)
 
