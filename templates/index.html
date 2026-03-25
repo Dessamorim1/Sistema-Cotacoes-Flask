@@ -36,11 +36,7 @@
         <div class="nome-barra">
             Cotações - SAFE SOLUÇÕES
         </div>
-        <div class="toggled-buttom">
-            <button type="button" id="toggled" onclick="toggled()">
-                <i class="ph ph-sun tg"></i>
-                <i class="ph ph-moon tg-night"></i>
-            </button>
+        <div class="btn-logout">
             <button type="button" id="btnLogout" class="out-button" onclick="chamar_logout()">
                 <i class="ph ph-sign-out"></i>
             </button>
@@ -396,7 +392,7 @@
                     </button>
                 </div>
             </section>
-            <!-- <div class="container-fluid mt-3">
+            <div class="container-fluid mt-3">
                 <div class="table-responsive custom-table">
 
                     <table class="table table-bordered align-middle">
@@ -417,94 +413,47 @@
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody id="grid-concorrentes">
                             <tr>
-                                <td>1</td>
-                                <td><select class="form-select form-select-sm">
+                                <td class="rowno"></td>
+                                <td><select class="form-select form-select-sm Concorrente_grid">
                                         <option selected disabled>Selecione</option>
                                         <option value=""></option>
                                     </select></td>
-                                <td><select class="form-select form-select-sm">
+                                <td><select class="form-select form-select-sm ThreatLevel_grid">
                                         <option selected disabled>Selecione</option>
-                                        <option value="tlLow">Baixo</option>
-                                        <option value="tlMedium">Médio</option>
-                                        <option value="tlHigh">Alto</option>
+                                        <option value="Low">Baixo</option>
+                                        <option value="Medium">Médio</option>
+                                        <option value="High">Alto</option>
                                     </select></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td class="link"></td>
-                                <td></td>
+                                <td class="Marca_grid"></td>
+                                <td class="Modelo_grid"></td>
+                                <td class="Obs_grid"></td>
+                                <td class="Qtde_grid"></td>
+                                <td class="ValorUnit_grid"></td>
+                                <td class="ValorTot_grid"></td>
+                                <td class="Pos_grid"></td>
                                 <td>
                                     <select class="form-select form-select-sm items-safe">
                                         <option selected disabled>Selecione</option>
                                         <option value=""></option>
                                     </select>
                                 </td>
-                                <td class="cotacao"> <span class="arrow"></span></td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-
-                </div>
-            </div> -->
-            <!-- Aba Concorrentes -->
-            <div id="concorrentes" class="tab-content active">
-                <div class="aba-concorrentes">
-                    <div class="concorrentes-grid" id="grid-concorrentes">
-                        <div>Linha</div>
-                        <div>Concorrente</div>
-                        <div>Grau de Ameaça</div>
-                        <div>Marca/Fabricante</div>
-                        <div>Modelo</div>
-                        <div>Observação</div>
-                        <div>Qtde</div>
-                        <div>V. Unitário</div>
-                        <div>V. Total</div>
-                        <div>Posição</div>
-                        <div>Item Safe</div>
-                        <div>Item Fora</div>
-
-                        <div><input type="hidden" class="rowno" readonly /></div>
-                        <div><select class="grid-select conc">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                        <div>
-                            <select class="grid-select">
-                                <option value=""></option>
-                                <option value="Low">Baixo</option>
-                                <option value="Medium">Médio</option>
-                                <option value="High">Alto</option>
-                            </select>
-                        </div>
-                        <div><input type="text" /></div>
-                        <div><input type="text" /></div>
-                        <div><input type="text" /></div>
-                        <div><input type="number" /></div>
-                        <div><input type="text" /></div>
-                        <div><input type="text" /></div>
-                        <div><input type="number" /></div>
-                        <div>
-                            <select class="items-safe">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                        <div class="item-fora" style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" class="nome-item" readonly style="flex:1;" />
-                            <button type="button" onclick="abrirModalItemSafe(this)" style="padding:2px 6px;"><i
+                                <td class="cotacao item-fora" style="display:flex; gap:4px; align-items:center;">
+                                    <input type="text" class="nome-item form-control form-control-sm" readonly />
+                                    <button type="button" onclick="abrirModalItemSafe(this)"><i
                                     class="ph-fill ph-arrow-fat-right modal-arrow"
                                     style="color: #a4b7c1"></i></button>
-                        </div>
-                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modal para adicionar novo concorrente -->
+
+    <!-- < --Modal para adicionar novo concorrente -->
     <div id="modalConcorrente" class="modal">
         <div class="modal-content">
             <span onclick="fecharModal()" class="close">&times;</span>

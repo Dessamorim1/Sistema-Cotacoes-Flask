@@ -45,12 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-// Toglled night and day
-
-function toggled() {
-    document.body.classList.toggle("dark");
-}
-
 // Alerta
 
 function alerta(tipo, titulo, mensagem) {
@@ -89,57 +83,56 @@ function mensagem_erro(err, tituloPadrao = "Erro") {
 // GerarLinhas
 
 function GerarLinhas(qtd = 50) {
-    const grid = document.getElementById("grid-concorrentes");
-    if (!grid) return;
+    const tbody = document.getElementById("grid-concorrentes");
+    if (!tbody) return;
 
-    grid.innerHTML = `
-        <div>#</div>
-        <div>Concorrente</div>
-        <div>Grau de Ameaça</div>
-        <div>Marca/Fabricante</div>
-        <div>Modelo</div>
-        <div>Observação</div>
-        <div>Qtde</div>
-        <div>V. Unitário</div>
-        <div>V. Total</div>
-        <div>Posição</div>
-        <div>Item Safe</div>
-        <div>Item Fora</div>
-    `;
+    tbody.innerHTML = "";
 
     for (let i = 0; i < qtd; i++) {
-        grid.insertAdjacentHTML("beforeend", `
-            <div><input type="hidden" class="rowno" readonly value="${i + 1}" /></div>
-            <div>
-                <select class="grid-select concorrente-select">
-                    <option value=""></option>
-                </select>
-            </div>
-            <div>
-                <select class="grid-select">
-                    <option value=""></option>
-                    <option value="Low">Baixo</option>
-                    <option value="Medium">Médio</option>
-                    <option value="High">Alto</option>
-                </select>
-            </div>
-            <div><input type="text" class="marca" /></div>
-            <div><input type="text" class="modelo" /></div>
-            <div><input type="text" class="observacao" /></div>
-            <div><input type="number" class="quantidade" /></div>
-            <div><input type="text" class="valor-unitario" /></div>
-            <div><input type="text" class="valor-total" /></div>
-            <div><input type="number" class="posicao" /></div>
-            <div><select class="items-safe">
-                <option value=""></option>
-                </select>
-            </div>
-             <div class="item-fora" style="display:flex; align-items:center; gap:4px;">
-            <input type="text" class="nome-item" readonly style="flex:1;" />
-            <button type="button" onclick="abrirModalItemSafe(this)" style="padding:2px 6px;"><i
-            class="ph-fill ph-arrow-fat-right modal-arrow"
-            style="color: #a4b7c1"></i></button>
-            </div>
+        tbody.insertAdjacentHTML("beforeend", `
+            <tr>
+                <td class="rowno">${i + 1}</td>
+
+                <td>
+                    <select class="form-select form-select-sm Concorrente_grid">
+                        <option value=""></option>
+                    </select>
+                </td>
+
+                <td>
+                    <select class="form-select form-select-sm ThreatLevel_grid">
+                        <option value=""></option>
+                        <option value="tlLow">Baixo</option>
+                        <option value="tlMedium">Médio</option>
+                        <option value="tlHigh">Alto</option>
+                    </select>
+                </td>
+
+                <td class="Marca_grid"></td>
+                <td class="Modelo_grid"></td>
+                <td class="Obs_grid"></td>
+
+                <td><input type="number" class="Qtde_grid form-control form-control-sm" /></td>
+
+                <td><input type="text" class="ValorUnit_grid form-control form-control-sm" /></td>
+
+                <td class="ValorTot_grid"></td>
+
+                <td><input type="number" class="Pos_grid form-control form-control-sm" /></td>
+
+                <td>
+                    <select class="form-select form-select-sm items-safe">
+                        <option value=""></option>
+                    </select>
+                </td>
+
+                <td class="cotacao item-fora" style="display:flex; gap:4px; align-items:center;">
+                <input type="text" class="nome-item form-control form-control-sm" readonly />
+                <button type="button" onclick="abrirModalItemSafe(this)"><i
+                class="ph-fill ph-arrow-fat-right modal-arrow"
+                style="color: #a4b7c1"></i></button>
+                </td>
+            </tr>
         `);
     }
 }
@@ -383,28 +376,34 @@ async function buscar_cotacao() {
 async function buscar_linhas_cotacao(DocNum) {
     DocNum = String(DocNum ?? '').trim();
 
-    const linhas = document.querySelectorAll(".concorrentes-grid div input, .concorrentes-grid div select");
+    const linhas = document.querySelectorAll("#grid-concorrentes tr");
 
-    for (let i = 0; i < linhas.length; i += 12) {
-        const camposLinha = Array.from(linhas).slice(i, i + 12);
+    linhas.forEach(linha => {
+        linha.querySelector(".rowno").textContent = "";
 
-        camposLinha[0].value = "";
+        linha.querySelector(".Concorrente_grid").innerHTML = '<option value=""></option>';
 
-        camposLinha[1].innerHTML = '<option value=""></option>';
-
-        camposLinha[2].innerHTML = `
+        linha.querySelector(".ThreatLevel_grid").innerHTML = `
             <option value=""></option>
             <option value="Low">Baixo</option>
             <option value="Medium">Médio</option>
             <option value="High">Alto</option>
         `;
 
-        for (let j = 3; j < 10; j++) {
-            if (camposLinha[j]) camposLinha[j].value = "";
-        }
+        linha.querySelector(".Marca_grid").textContent = "";
+        linha.querySelector(".Modelo_grid").textContent = "";
+        linha.querySelector(".Obs_grid").textContent = "";
 
-        camposLinha[10].innerHTML = '<option value=""></option>';
-    }
+        linha.querySelector(".Qtde_grid").value = "";
+        linha.querySelector(".ValorUnit_grid").value = "";
+        linha.querySelector(".ValorTot_grid").textContent = "";
+        linha.querySelector(".Pos_grid").value = "";
+
+        linha.querySelector(".items-safe").innerHTML = '<option value=""></option>';
+
+        const itemFora = linha.querySelector(".item-fora input");
+        if (itemFora) itemFora.value = "";
+    });
 
     try {
         const res = await fetch(`/api/buscar_cotacao_comp?DocNum=${encodeURIComponent(DocNum)}`);
@@ -416,76 +415,60 @@ async function buscar_linhas_cotacao(DocNum) {
         }
 
         const dados = await res.json();
-        console.log(dados.length)
-        if (!dados || dados.length === 0) {
-            const lista = Array.from(linhas);
-            lista.forEach(campo => {
-                if (campo.tagName === 'SELECT') {
-                    campo.innerHTML = '';
-                    campo.value = '';
-                } else {
-                    campo.value = '';
-                }
-            });
-            return;
-        }
+        console.log(dados)
+        if (!dados || dados.length === 0) return;
 
-        //  console.log(dados)
-        // codigosItens
         dados.forEach(element => {
-            if (element.U_LineNum === '999') {
+            if (Number(element.U_LineNum) === 999) {
                 codigosItens.push(element);
-                console.log("FORA COTAÇÃO")
-                console.log(element)
             }
         });
 
-        const lista = Array.from(linhas);
+        linhas.forEach((linha, i) => {
+            const c = dados[i];
+            if (!c) return;
 
-        for (let i = 0; i < dados.length; i++) {
-            const campos = lista.slice(i * 12, (i + 1) * 12);
-            if (campos.length < 12) break;
+            // índice
+            linha.querySelector(".rowno").value = c.Code || "";
 
-            const c = dados[i] || {};
+            const selectConc = linha.querySelector(".Concorrente_grid");
+            selectConc.innerHTML = "";
 
-            campos[0].value = c.Code || "";
-            const select = campos[1];
-            select.innerHTML = '';
             concorrentesCadastrados.forEach(cOpt => {
                 const opt = document.createElement("option");
                 opt.value = cOpt.SequenceNo;
                 opt.text = cOpt.Name;
-                select.appendChild(opt);
+                selectConc.appendChild(opt);
             });
 
-            const optionSelecionada = Array.from(select.options)
+            const optionSelecionada = Array.from(selectConc.options)
                 .find(opt => Number(opt.value) === Number(c.U_ComptID));
 
-            select.value = optionSelecionada ? optionSelecionada.value : "";
+            selectConc.value = optionSelecionada ? optionSelecionada.value : "";
 
-            campos[2].value = c.U_ThreatLevel || '';
-            campos[3].value = c.U_Marca || '';
-            campos[4].value = c.U_Modelo || '';
-            campos[5].value = c.U_Observacao || '';
-            campos[6].value = c.U_Quantidade || '';
-            campos[7].value = formatarMoedaParaExibicao(c.U_ValorUnit) || '';
-            campos[8].value = formatarMoedaParaExibicao(c.U_ValorTot) || '';
-            campos[9].value = c.U_Posicao || '';
+            linha.querySelector(".ThreatLevel_grid").value = c.U_ThreatLevel || '';
 
-            const itemSelect = campos[10];
-            itemSelect.classList.add("select-item");
-            itemSelect.innerHTML = '';
+            linha.querySelector(".Marca_grid").textContent = c.U_Marca || '';
+            linha.querySelector(".Modelo_grid").textContent = c.U_Modelo || '';
+            linha.querySelector(".Obs_grid").textContent = c.U_Observacao || '';
+
+            linha.querySelector(".Qtde_grid").value = c.U_Quantidade || '';
+            linha.querySelector(".ValorUnit_grid").value = formatarMoedaParaExibicao(c.U_ValorUnit) || '';
+            linha.querySelector(".ValorTot_grid").textContent = formatarMoedaParaExibicao(c.U_ValorTot) || '';
+            linha.querySelector(".Pos_grid").value = c.U_Posicao || '';
+
+            const itemSelect = linha.querySelector(".items-safe");
+            itemSelect.innerHTML = "";
 
             itensCadastrados.forEach(dOpt => {
-                const optItem = document.createElement("option");
-                optItem.value = dOpt.LineNum;
-                optItem.text = dOpt.ItemDescription;
-                itemSelect.appendChild(optItem);
+                const opt = document.createElement("option");
+                opt.value = dOpt.LineNum;
+                opt.text = dOpt.ItemDescription;
+                itemSelect.appendChild(opt);
             });
 
-            const optionNew = document.createElement("option");
-            optionNew.value = "999";
-            optionNew.textContent = "Item fora da cotação";
+            // opção fora da cotação
+            const optionNew = new Option("Item fora da cotação", "999");
             itemSelect.appendChild(optionNew);
 
             let optionItem = Array.from(itemSelect.options)
@@ -499,16 +482,19 @@ async function buscar_linhas_cotacao(DocNum) {
                     optionItem.text = "Item Fora da cotação";
                 }
             }
+
             itemSelect.value = optionItem ? optionItem.value : "";
 
-            campos[11].value = c.U_ItemCode || '';
-        }
+            const inputItemFora = linha.querySelector(".item-fora input");
+            if (inputItemFora) {
+                inputItemFora.value = c.U_ItemCode || '';
+            }
+        });
 
     } catch (err) {
         alerta('error', 'Erro ao buscar Competidores da Cotação', err.message);
     }
 }
-
 // Buscar informações da cotação
 
 async function buscar_info_cotacao(DocEntry) {
@@ -759,17 +745,19 @@ async function criar_concorrente() {
 // Atualizar Concorrente + Configuração de linha
 
 function pegar_linha() {
-    const linhas = document.querySelector(".concorrentes-grid");
-    const linha = Array.from(linhas.children);
 
-    for (let i = 12; i < linha.length; i += 12) {
-        payload.push(linha.slice(i, i + 12));
-    }
+    const tbody = document.querySelector("#grid-concorrentes");
+    const linhas = Array.from(tbody.querySelectorAll("tr"));
 
-    payload.forEach(linha => {
-        const qtdInput = linha[6].querySelector("input");
-        const unitInput = linha[7].querySelector("input");
-        const totInput = linha[8].querySelector("input");
+    payload = [];
+
+    linhas.forEach(linha => {
+
+        payload.push(linha);
+
+        const qtdInput = linha.querySelector(".Qtde_grid");
+        const unitInput = linha.querySelector(".ValorUnit_grid");
+        const totCell = linha.querySelector(".ValorTot_grid");
 
         if (unitInput) {
             unitInput.addEventListener("input", (e) => {
@@ -779,58 +767,49 @@ function pegar_linha() {
         }
 
         if (qtdInput) {
-            qtdInput.addEventListener("input", () => calcular_total_linha(linha));
+            qtdInput.addEventListener("input", () => {
+                calcular_total_linha(linha);
+            });
         }
 
-        if (totInput) {
-            totInput.readOnly = true;
+        if (totCell) {
+            totCell.contentEditable = false;
         }
     });
 
+    tbody.addEventListener("click", (event) => {
 
-    linhas.addEventListener("click", (event) => {
-        const divLinha = event.target.closest("div");
-        if (!divLinha) return;
-
-        const linhaClicada = payload.find(c => c.includes(divLinha));
+        const linhaClicada = event.target.closest("tr");
         if (!linhaClicada) return;
 
-        payload.forEach(c =>
-            c.forEach(div => {
-                div.classList.remove("linha-selecionada");
-                div.querySelectorAll("input,select").forEach(el => {
-                    el.classList.remove("linha-selecionada-campo");
-                });
-            })
-        );
+        linhas.forEach(l => {
+            l.classList.remove("linha-selecionada");
 
-        linhaClicada.forEach(div => {
-            div.classList.add("linha-selecionada");
-            div.querySelectorAll("input,select").forEach(el => {
-                el.classList.add("linha-selecionada-campo");
+            l.querySelectorAll("input, select").forEach(el => {
+                el.classList.remove("linha-selecionada-campo");
             });
         });
 
-        const codigo = linhaClicada[0].querySelector("input.rowno");
-        CodeSelecionado = codigo ? codigo.value : null;
+        linhaClicada.classList.add("linha-selecionada");
 
-        const linhaS = payload.find(linhaS => {
-            const inputCode = linhaS[0].querySelector("input.rowno");
-            return inputCode && inputCode.value == CodeSelecionado;
+        linhaClicada.querySelectorAll("input, select").forEach(el => {
+            el.classList.add("linha-selecionada-campo");
         });
 
-        if (!linhaS) {
+        const codigo = linhaClicada.querySelector(".rowno");
+        CodeSelecionado = codigo ? codigo.value : null;
+
+        if (!linhaClicada) {
             return alerta('error', 'Erro', 'Linha do concorrente não encontrada.');
         }
 
         linhaSelecionada = linhaClicada;
 
-    }
-    )
+    });
 }
 
 async function atualizar_concorrente() {
-    const DocNum = document.getElementById("DocNum").value
+    const DocNum = document.getElementById("DocNum").value;
 
     if (!DocNum) {
         alerta('info', 'Nenhuma oportunidade selecionada', 'Você precisa buscar uma oportunidade primeiro.');
@@ -845,8 +824,8 @@ async function atualizar_concorrente() {
         );
     }
 
-    const lineValue = linhaSelecionada[10].querySelector("select").value;
-    const ItemCode = linhaSelecionada[11].querySelector("input").value;
+    const lineValue = linhaSelecionada.querySelector(".items-safe")?.value;
+    const ItemCode = linhaSelecionada.querySelector(".item-fora .nome-item")?.value;
 
     const line = Number(lineValue);
 
@@ -870,31 +849,56 @@ async function atualizar_concorrente() {
     }
 
     let concorrenteAtualizado;
+
     try {
         concorrenteAtualizado = {
-            U_ComptID: linhaSelecionada[1].querySelector("select").value,
-            U_ThreatLevel: linhaSelecionada[2].querySelector("select").value,
-            U_Marca: linhaSelecionada[3].querySelector("input").value.trim(),
-            U_Modelo: linhaSelecionada[4].querySelector("input").value.trim(),
-            U_Observacao: linhaSelecionada[5].querySelector("input").value.trim(),
-            U_Quantidade: validarNumero(linhaSelecionada[6].querySelector("input"), "Quantidade"),
-            U_ValorUnit: validarNumero(linhaSelecionada[7].querySelector("input"), "Valor Unitário"),
-            U_ValorTot: validarNumero(linhaSelecionada[8].querySelector("input"), "Valor Total"),
-            U_Posicao: validarNumero(linhaSelecionada[9].querySelector("input"), "Posição"),
+            U_ComptID: linhaSelecionada.querySelector(".Concorrente_grid")?.value,
+
+            U_ThreatLevel: linhaSelecionada.querySelector(".ThreatLevel_grid")?.value,
+
+            U_Marca: linhaSelecionada.querySelector(".Marca_grid")?.textContent?.trim() || "",
+
+            U_Modelo: linhaSelecionada.querySelector(".Modelo_grid")?.textContent?.trim() || "",
+
+            U_Observacao: linhaSelecionada.querySelector(".Obs_grid")?.textContent?.trim() || "",
+
+            U_Quantidade: validarNumero(
+                linhaSelecionada.querySelector(".Qtde_grid"),
+                "Quantidade"
+            ),
+
+            U_ValorUnit: validarNumero(
+                linhaSelecionada.querySelector(".ValorUnit_grid"),
+                "Valor Unitário"
+            ),
+
+            U_ValorTot: validarNumero(
+                linhaSelecionada.querySelector(".ValorTot_grid"),
+                "Valor Total"
+            ),
+
+            U_Posicao: validarNumero(
+                linhaSelecionada.querySelector(".Pos_grid"),
+                "Posição"
+            ),
+
             U_LineNum: Number(lineValue),
-            U_ItemCode: Number(lineValue) === 999 ? ItemCode : ""
+
+            U_ItemCode: line === 999 ? ItemCode : ""
         };
 
     } catch (err) {
         await alerta('warning', 'Campo inválido', err.message);
         return;
     }
+
     try {
         const resp = await apiFetch(`/api/atualizar_concorrente/${CodeSelecionado}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(concorrenteAtualizado)
-        })
+        });
+
         if (!resp) return;
 
         let data = null;
@@ -909,14 +913,9 @@ async function atualizar_concorrente() {
         CodeSelecionado = null;
         linhaSelecionada = null;
 
-        payload.forEach(linha =>
-            linha.forEach(div => {
-                div.classList.remove("linha-selecionada");
-                div.querySelectorAll("input, select").forEach(el => {
-                    el.classList.remove("linha-selecionada-campo");
-                });
-            })
-        );
+        document.querySelectorAll("#grid-concorrentes tr").forEach(tr => {
+            tr.classList.remove("linha-selecionada");
+        });
 
         buscar_linhas_cotacao(DocNum);
 
@@ -927,7 +926,10 @@ async function atualizar_concorrente() {
 }
 
 function validarNumero(input, nomeCampo) {
-    const valor = parseValorBR(input.value)
+    const valorBruto = input?.value ?? input?.textContent ?? "";
+
+    const valor = parseValorBR(valorBruto);
+
     if (isNaN(valor) || valor <= 0) {
         throw new Error(`Campo "${nomeCampo}" inválido. Informe um número maior que 0.`);
     }
@@ -1049,17 +1051,19 @@ function calcular_total() {
 }
 
 function calcular_total_linha(linha) {
-    const qtdInput = linha[6].querySelector("input");
-    const unitInput = linha[7].querySelector("input");
-    const totInput = linha[8].querySelector("input");
 
-    if (!qtdInput || !unitInput || !totInput) return;
+    const qtdInput = linha.querySelector(".Qtde_grid");
+    const unitInput = linha.querySelector(".ValorUnit_grid");
+    const totCell = linha.querySelector(".ValorTot_grid");
+
+    if (!qtdInput || !unitInput || !totCell) return;
 
     const qtd = Number(qtdInput.value) || 0;
     const unit = parseValorBR(unitInput.value) || 0;
 
     const total = qtd * unit;
-    totInput.value = formatarMoedaParaExibicao(total);
+
+    totCell.textContent = formatarMoedaParaExibicao(total);
 }
 
 async function apiFetchJson(url, options = {}) {
@@ -1147,27 +1151,25 @@ async function chamar_logout() {
 // ===== Modal Itens =====
 
 function abrirModalItemSafe(botao) {
-    const linha = botao.closest(".concorrentes-grid");
 
-    const selects = linha.querySelectorAll(".select-item");
+    const linha = botao.closest("tr");
 
-    const botoes = linha.querySelectorAll(".item-fora button");
-    const index = Array.from(botoes).indexOf(botao);
+    const itemSelect = linha.querySelector(".items-safe");
 
-    const itemSelect = selects[index];
-
-    if (Number(itemSelect?.value) != 999) {
-        return alerta('warning', 'Item Safe incorreto', 'Você precisa informar que é um item fora da cotação primeiro.');
+    if (Number(itemSelect?.value) !== 999) {
+        return alerta(
+            'warning',
+            'Item Safe incorreto',
+            'Você precisa informar que é um item fora da cotação primeiro.'
+        );
     }
-
-    const container = botao.parentElement;
-    inputAtivo = container.querySelector(".nome-item");
+    const input = linha.querySelector(".item-fora .nome-item");
+    inputAtivo = input;
 
     document.getElementById("modalItemSafe").style.display = "flex";
 
     document.getElementById("ItemsSafeModal").innerHTML = '<option value="">Carregando...</option>';
     document.getElementById("ItemSafeModal").innerHTML = '<option value="">Selecione</option>';
-
     carregar_filtro_itens("ItemsSafeModal", (code) => {
         carregarItensFiltradosGenerico("ItemSafeModal", code, inputAtivo);
     });
