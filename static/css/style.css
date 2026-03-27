@@ -584,20 +584,6 @@ button:disabled {
   padding-right: 16px;
 }
 
-.table tbody tr:hover {
-  background: #f7f7f7;
-}
-
-.ValorUnit_grid,
-.ValorTot_grid,
-.Qtde_grid {
-  text-align: right;
-}
-
-.Pos_grid {
-  text-align: center;
-}
-
 .item-fora {
   display: flex;
   align-items: center;
@@ -632,12 +618,10 @@ button:disabled {
 
 .Pos_grid {
   width: 50px;
-  text-align: center;
 }
 
 .ValorUnit_grid {
   width: 50px;
-  text-align: center;
 }
 
 .table th:nth-child(6),
@@ -658,4 +642,17 @@ button:disabled {
 .table td,
 .table th {
   white-space: nowrap;
+}
+
+.Qtde_grid,
+.Pos_grid {
+  text-align: center;
+}
+
+.Qtde_grid input,
+.Pos_grid input,
+.Qtde_grid select,
+.Pos_grid select {
+  text-align: center;
+  width: 100%;
 }

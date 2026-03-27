@@ -108,8 +108,9 @@ function GerarLinhas(qtd = 50) {
                     </select>
                 </td>
 
-                <td class="Marca_grid"></td>
-                <td class="Modelo_grid"></td>
+                <td><input type="text" class="Marca_grid from-control form-control-sm" /></td>
+             
+                <td><input type="text" class="Modelo_grid form-control form-control-sm" /></td>
 
                 <td><input type="number" class="Qtde_grid form-control form-control-sm" /></td>
 
@@ -388,8 +389,8 @@ async function buscar_linhas_cotacao(DocNum) {
             <option value="High">Alto</option>
         `;
 
-        linha.querySelector(".Marca_grid").textContent = "";
-        linha.querySelector(".Modelo_grid").textContent = "";
+        linha.querySelector(".Marca_grid").value = "";
+        linha.querySelector(".Modelo_grid").value = "";
 
         linha.querySelector(".Qtde_grid").value = "";
         linha.querySelector(".ValorUnit_grid").value = "";
@@ -445,8 +446,8 @@ async function buscar_linhas_cotacao(DocNum) {
 
             linha.querySelector(".ThreatLevel_grid").value = c.U_ThreatLevel || '';
 
-            linha.querySelector(".Marca_grid").textContent = c.U_Marca || '';
-            linha.querySelector(".Modelo_grid").textContent = c.U_Modelo || '';
+            linha.querySelector(".Marca_grid").value = c.U_Marca || '';
+            linha.querySelector(".Modelo_grid").value = c.U_Modelo || '';
 
             linha.querySelector(".Qtde_grid").value = c.U_Quantidade || '';
             linha.querySelector(".ValorUnit_grid").value = formatarMoedaParaExibicao(c.U_ValorUnit) || '';
@@ -849,12 +850,9 @@ async function atualizar_concorrente() {
     try {
         concorrenteAtualizado = {
             U_ComptID: linhaSelecionada.querySelector(".Concorrente_grid")?.value,
-
             U_ThreatLevel: linhaSelecionada.querySelector(".ThreatLevel_grid")?.value,
-
-            U_Marca: linhaSelecionada.querySelector(".Marca_grid")?.textContent?.trim() || "",
-
-            U_Modelo: linhaSelecionada.querySelector(".Modelo_grid")?.textContent?.trim() || "",
+            U_Marca: linhaSelecionada.querySelector(".Marca_grid")?.value,
+            U_Modelo: linhaSelecionada.querySelector(".Modelo_grid")?.value,
 
             U_Quantidade: validarNumero(
                 linhaSelecionada.querySelector(".Qtde_grid"),
