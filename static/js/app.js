@@ -1,22 +1,38 @@
+// Variáveis
+
 let concorrentesCadastrados = [];
-let itensCadastrados = [];
+let eventoGridAtivo = false;
 let codigosItens = [];
-let nomes = [];
+let itensCadastrados = [];
 let CodeSelecionado = null;
 let linhaSelecionada = null;
 let payload = [];
-let itensFora_cotacao = [];
+let nomes = [];
 
 // Listeners
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Carregamentos iniciais
     carregar_concorrentes();
-    GerarLinhas();
+    GerarLinhas(80);
+    modalConcorrenteEvt();
     pegar_linha();
 
-    // Elementos
+    // Buscar
+    BuscarCotacaoEvt();
+    LogoutEvt();
+
+    // Criar
+    CriarNomeModalEvt();
+    criarInfoCotacaoEvt();
+    criarConcorrenteEvt();
+
+    // Atualizar
+    atualizarLinhasEvt();
+
+    // Fechar modal
+    FecharModalBtnEvt();
+    FecharModalBtnAEvt();
+
     const unit = document.getElementById("U_ValorUnit");
     const qtd = document.getElementById("U_Quantidade");
     const total = document.getElementById("U_ValorTot");
@@ -42,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!/[0-9]/.test(e.key)) e.preventDefault();
         });
     }
-
 });
 
 // Alerta
@@ -61,7 +76,7 @@ function alerta(tipo, titulo, mensagem) {
     });
 }
 
-// Mensagens erro de rede 
+// Trtamento de erros de rede
 
 function mensagem_erro(err, tituloPadrao = "Erro") {
     const msg = (err && err.message) ? err.message : String(err);
@@ -80,16 +95,14 @@ function mensagem_erro(err, tituloPadrao = "Erro") {
     alerta('error', tituloPadrao, msg);
 }
 
-// GerarLinhas
-
 function GerarLinhas(qtd = 50) {
     const tbody = document.getElementById("grid-concorrentes");
     if (!tbody) return;
 
-    tbody.innerHTML = "";
+    let html = "";
 
     for (let i = 0; i < qtd; i++) {
-        tbody.insertAdjacentHTML("beforeend", `
+        html += `
             <tr>
                 <td class="rowno">${i + 1}</td>
 
@@ -108,10 +121,8 @@ function GerarLinhas(qtd = 50) {
                     </select>
                 </td>
 
-                <td><input type="text" class="Marca_grid from-control form-control-sm" /></td>
-             
+                <td><input type="text" class="Marca_grid form-control form-control-sm" /></td>
                 <td><input type="text" class="Modelo_grid form-control form-control-sm" /></td>
-
                 <td><input type="number" class="Qtde_grid form-control form-control-sm" /></td>
 
                 <td><input type="text" class="ValorUnit_grid form-control form-control-sm" /></td>
@@ -127,209 +138,19 @@ function GerarLinhas(qtd = 50) {
                 </td>
 
                 <td class="cotacao item-fora" style="display:flex; gap:4px; align-items:center;">
-                <input type="text" class="nome-item form-control form-control-sm" readonly />
-                <button type="button" onclick="abrirModalItemSafe(this)"><i class="ph ph-arrow-right"
-                style="color: #ecd713"></i></button>
+                    <input type="text" class="nome-item form-control form-control-sm" readonly />
+                    <button type="button" class="btn-item-safe">
+                        <i class="ph ph-arrow-right" style="color: #ecd713"></i>
+                    </button>
                 </td>
             </tr>
-        `);
-    }
-}
-
-// Requisições GET
-
-// Selects
-
-async function carregar_concorrentes() {
-    fetch('/api/buscar_concorrentes')
-        .then(res => res.json())
-        .then(lista => {
-            concorrentesCadastrados = lista;
-            nomes = lista.map(c => c.Name);
-
-            const concorrente = document.getElementById("concorrente");
-            if (!concorrente) return;
-
-            concorrente.innerHTML = '<option value="">Selecione</option>';
-            lista.forEach(c => {
-                const option = document.createElement("option");
-                option.value = c.SequenceNo;
-                option.text = c.Name;
-                concorrente.appendChild(option);
-            });
-            const optionNew = document.createElement("option");
-            optionNew.value = "novo";
-            optionNew.text = "Definir Novo";
-            concorrente.appendChild(optionNew);
-
-            concorrente.addEventListener("change", function () {
-                if (this.value === "novo") {
-                    this.value = "";
-                    abrirModal();
-                }
-            })
-        })
-        .catch(() => {
-            alerta('error', 'Erro ao carregar competidores', 'Não foi possível carregar a lista de competidores. Por favor, tente novamente mais tarde.');
-        });
-}
-
-async function carregar_itens(DocNum) {
-    try {
-        const response = await fetch(`/api/buscar_itens_cotacao?DocNum=${encodeURIComponent(DocNum)}`);
-
-        if (!response.ok) {
-            throw new Error('Erro ao buscar itens da cotação');
-        }
-
-        const lista = await response.json();
-        itensCadastrados = lista;
-
-        const itens = document.getElementById("ItemCotacao");
-        const modal = document.getElementById("itens-session");
-
-        if (!itens || !modal) return;
-        itens.innerHTML = '<option value="">Selecione</option>';
-
-        lista.forEach(c => {
-            const option = document.createElement("option");
-            console.log(c);
-            option.value = c.LineNum;
-            option.textContent = c.ItemDescription;
-            itens.appendChild(option);
-        });
-
-        const optionNew = document.createElement("option");
-        optionNew.value = "999";
-        optionNew.textContent = "Item fora da cotação";
-        itens.appendChild(optionNew);
-
-        itens.onchange = function () {
-            if (this.value === "999") {
-                modal.style.display = "block";
-
-                carregar_filtro_itens("U_FOC_GRP", (code) => {
-                    carregarItensFiltradosGenerico("Item_Filtrado", code);
-                });
-
-            } else {
-                modal.style.display = "none";
-            }
-        };
-
-    } catch (err) {
-        alerta(
-            'error',
-            'Erro ao carregar itens',
-            err.message || 'Não foi possível carregar os itens da cotação.'
-        );
-    }
-}
-
-async function carregar_filtro_itens(selectId, onChangeCallback) {
-    try {
-        const response = await fetch('/api/buscar_filtro_itens');
-
-        if (!response.ok) {
-            throw new Error('Erro ao buscar itens da cotação');
-        }
-
-        const lista = await response.json();
-
-        const itens = document.getElementById(selectId);
-        if (!itens) return;
-
-        const $itens = $(itens);
-
-        $itens.off('change');
-        $itens.empty().append('<option value="">Selecione</option>');
-
-        lista.forEach(c => {
-            const option = new Option(c.Name, c.Code, false, false);
-            itens.appendChild(option);
-        });
-
-        $itens.val(null).trigger('change');
-
-        if (onChangeCallback) {
-            $itens.on("change", function () {
-                onChangeCallback(this.value);
-            });
-        }
-
-    } catch (err) {
-        alerta(
-            'error',
-            'Erro ao carregar itens',
-            err.message || 'Não foi possível carregar o filtro de itens da cotação.'
-        );
-    }
-}
-
-// ===== Carrega itens filtrados =====
-
-async function carregarItensFiltradosGenerico(selectId, code, inputAtivo = null) {
-    const $select = $('#' + selectId);
-    $select.empty().append('<option>Carregando...</option>');
-
-    if (!code) {
-        $select.empty().append('<option value="">Selecione</option>');
-        if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
-        return;
+        `;
     }
 
-    try {
-        const lista = await apiFetchJson(
-            `/api/buscar_itens_filtrados?U_FOC=${encodeURIComponent(code)}`
-        );
-        if (!lista) return;
-
-        todos_itens_safe = lista;
-
-        $select.empty().append('<option value="">Selecione</option>');
-
-        if (!Array.isArray(lista) || lista.length === 0) {
-            $select.append('<option value="">Nenhum item</option>');
-            if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
-            alerta('error', 'Nenhum item encontrado', 'Não existe nenhum item com esse tipo.');
-            return;
-        }
-
-        lista.forEach(item => {
-            $select.append(new Option(item.ItemName, item.ItemCode));
-        });
-
-        if ($select.hasClass("select2-hidden-accessible")) {
-            $select.trigger('change');
-        } else {
-            $select.select2({
-                placeholder: 'Digite para filtrar...',
-                allowClear: true,
-                width: 'resolve'
-            });
-        }
-
-        if (inputAtivo) {
-            $select.off('select2:select').on('select2:select', function (e) {
-                const selecionado = e.params.data;
-                inputAtivo.value = selecionado.id || '';
-                fecharModal_Items();
-            });
-
-            $select.off('select2:clear').on('select2:clear', function () {
-                inputAtivo.value = '';
-            });
-        }
-
-        if (lista.length === 1) {
-            $select.val(lista[0].ItemCode).trigger('change');
-        }
-
-    } catch (err) {
-        console.error(err);
-        mensagem_erro(err, 'Erro ao carregar itens');
-    }
+    tbody.innerHTML = html;
 }
+
+// GETS
 
 // Buscar Cotação
 
@@ -489,9 +310,10 @@ async function buscar_linhas_cotacao(DocNum) {
         });
 
     } catch (err) {
-        alerta('error', 'Erro ao buscar Competidores da Cotação', err.message);
+        mensagem_erro(err, 'Erro ao buscar Competidores da Cotação');
     }
 }
+
 // Buscar informações da cotação
 
 async function buscar_info_cotacao(DocEntry) {
@@ -523,13 +345,205 @@ async function buscar_info_cotacao(DocEntry) {
 
     }
     catch (err) {
-        alerta('error', 'Erro ao buscar Informações da Cotação', err.message);
+        mensagem_erro(err, 'Erro ao buscar Informações da Cotação');
     }
 }
 
-// Atualizar Informações da Cotação
+// Requisições de carregamento
 
-async function atualizar_cotacao() {
+async function carregar_concorrentes() {
+    try {
+        const lista = await apiFetchJson('/api/buscar_concorrentes');
+
+        if (!lista) return;
+
+        concorrentesCadastrados = lista;
+        nomes = lista.map(c => c.Name);
+
+        const concorrente = document.getElementById("concorrente");
+        if (!concorrente) return;
+
+        concorrente.innerHTML = '<option value="">Selecione</option>';
+
+        lista.forEach(c => {
+            const option = document.createElement("option");
+            option.value = c.SequenceNo;
+            option.text = c.Name;
+            concorrente.appendChild(option);
+        });
+
+        const optionNew = document.createElement("option");
+        optionNew.value = "novo";
+        optionNew.text = "Definir Novo";
+        concorrente.appendChild(optionNew);
+
+        concorrente.onchange = function () {
+            if (this.value === "novo") {
+                this.value = "";
+                abrirModal();
+            }
+        };
+
+    } catch (err) {
+        mensagem_erro(err, 'Erro ao carregar competidores');
+    }
+}
+
+async function carregar_itens(DocNum) {
+    try {
+        const lista = await apiFetchJson(
+            `/api/buscar_itens_cotacao?DocNum=${encodeURIComponent(DocNum)}`
+        );
+
+        if (!lista) return;
+
+        itensCadastrados = lista;
+
+        const itens = document.getElementById("ItemCotacao");
+        const modal = document.getElementById("itens-session");
+
+        if (!itens || !modal) return;
+
+        itens.innerHTML = '<option value="">Selecione</option>';
+
+        lista.forEach(c => {
+            const option = document.createElement("option");
+            option.value = c.LineNum;
+            option.textContent = c.ItemDescription;
+            itens.appendChild(option);
+        });
+
+        const optionNew = document.createElement("option");
+        optionNew.value = "999";
+        optionNew.textContent = "Item fora da cotação";
+        itens.appendChild(optionNew);
+
+        itens.onchange = function () {
+            if (this.value === "999") {
+                modal.style.display = "block";
+
+                carregar_filtro_itens("U_FOC_GRP", (code) => {
+                    carregarItensFiltradosGenerico("Item_Filtrado", code);
+                });
+
+            } else {
+                modal.style.display = "none";
+            }
+        };
+
+    } catch (err) {
+        mensagem_erro(err, 'Erro ao carregar itens');
+    }
+}
+
+async function carregarItensFiltradosGenerico(selectId, code, inputAtivo = null) {
+    const $select = $('#' + selectId);
+    $select.empty().append('<option>Carregando...</option>');
+
+    if (!code) {
+        $select.empty().append('<option value="">Selecione</option>');
+        if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
+        return;
+    }
+
+    try {
+        const lista = await apiFetchJson(
+            `/api/buscar_itens_filtrados?U_FOC=${encodeURIComponent(code)}`
+        );
+        if (!lista) return;
+
+        todos_itens_safe = lista;
+
+        $select.empty().append('<option value="">Selecione</option>');
+
+        if (!Array.isArray(lista) || lista.length === 0) {
+            $select.append('<option value="">Nenhum item</option>');
+            if ($select.hasClass("select2-hidden-accessible")) $select.val('').trigger('change');
+            alerta('error', 'Nenhum item encontrado', 'Não existe nenhum item com esse tipo.');
+            return;
+        }
+
+        lista.forEach(item => {
+            $select.append(new Option(item.ItemName, item.ItemCode));
+        });
+
+        if ($select.hasClass("select2-hidden-accessible")) {
+            $select.trigger('change');
+        } else {
+            $select.select2({
+                placeholder: 'Digite para filtrar...',
+                allowClear: true,
+                width: 'resolve'
+            });
+        }
+
+        if (inputAtivo) {
+            $select.off('select2:select').on('select2:select', function (e) {
+                const selecionado = e.params.data;
+                inputAtivo.value = selecionado.id || '';
+                fecharModal_Items();
+            });
+
+            $select.off('select2:clear').on('select2:clear', function () {
+                inputAtivo.value = '';
+            });
+        }
+
+        if (lista.length === 1) {
+            $select.val(lista[0].ItemCode).trigger('change');
+        }
+
+    } catch (err) {
+        console.error(err);
+        mensagem_erro(err, 'Erro ao carregar itens');
+    }
+}
+
+async function carregar_filtro_itens(selectId, onChangeCallback) {
+    try {
+        const response = await fetch('/api/buscar_filtro_itens');
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar itens da cotação');
+        }
+
+        const lista = await response.json();
+
+        const itens = document.getElementById(selectId);
+        if (!itens) return;
+
+        const $itens = $(itens);
+
+        $itens.off('change');
+        $itens.empty().append('<option value="">Selecione</option>');
+
+        lista.forEach(c => {
+            const option = new Option(c.Name, c.Code, false, false);
+            itens.appendChild(option);
+        });
+
+        $itens.val(null).trigger('change');
+
+        if (onChangeCallback) {
+            $itens.on("change", function () {
+                onChangeCallback(this.value);
+            });
+        }
+
+    } catch (err) {
+        alerta(
+            'error',
+            'Erro ao carregar itens',
+            err.message || 'Não foi possível carregar o filtro de itens da cotação.'
+        );
+    }
+}
+
+// POSTS
+
+// Adicionar informações da Cotação
+
+async function adicionar_info_cotacao() {
     const DocNum = document.getElementById("DocNum").value;
     const DocEntry = document.getElementById("DocEntry").value;
 
@@ -539,53 +553,48 @@ async function atualizar_cotacao() {
     }
 
     if (!DocEntry) {
-        await alerta('warning', 'Nenhuma cotação selecionada', 'Você precisa buscar uma cotação primeiro.');
+        await alerta('warning', 'Nenhum DocEntry informado', 'É preciso informar um DocEntry primeiro.');
         return;
     }
 
     const payload = {
+        Code: DocEntry,
+        Name: DocEntry,
+        U_DocEntry: DocEntry,
         U_Modalidade: document.getElementById("U_Modalidade").value,
         U_Esfera: document.getElementById("U_Esfera").value,
         U_NumLicitacao: document.getElementById("U_NumLicitacao").value
     };
 
     try {
-        const resp = await apiFetch(`/api/atualizar_info_cotacao?DocEntry=${DocEntry}`,
-            {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }
-        );
+        const resp = await apiFetch("/api/criar_cotacao_info", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
         if (!resp) return;
+        if (resp.status === 409) {
+            await atualizar_cotacao();
+            return;
+        }
 
         let res = null;
         try { res = await resp.json(); } catch { }
 
         if (!resp.ok) {
-            throw new Error(res?.erro || res?.message || "Erro ao atualizar informações da cotação");
+            throw new Error(res?.erro || res?.message || `Erro HTTP ${resp.status}`);
         }
 
-        await alerta('success', 'Sucesso', "Informações da Cotação atualizada com sucesso");
+        await alerta('success', 'Sucesso', "Informações da Cotação adicionadas com sucesso");
 
     } catch (err) {
-        mensagem_erro(err, 'Erro ao atualizar informações da cotação');
+        mensagem_erro(err, 'Erro ao adicionar informações da cotação');
         console.error(err);
     }
 }
 
-// Criar Competidor + Modal
-
-function abrirModal() {
-    document.getElementById("modalConcorrente").style.display = "flex";
-}
-
-function fecharModal() {
-    document.getElementById("modalConcorrente").style.display = "none";
-}
-
-async function criarConcorrente() {
+async function criarConcorrenteNome() {
     const input = document.getElementById("nomeCompetidor");
     const nome = input.value.trim();
     const nomeDigitado = nome.toLowerCase();
@@ -614,7 +623,7 @@ async function criarConcorrente() {
             body: JSON.stringify({ novoConcorrenteNome: { Name: nome } })
         });
 
-        if (!data) return; // sessão expirada
+        if (!data) return;
 
         await alerta('success', 'Concorrente adicionado com sucesso', 'Você já pode usar o novo concorrente cadastrado.');
         input.value = "";
@@ -622,14 +631,9 @@ async function criarConcorrente() {
         carregar_concorrentes();
 
     } catch (err) {
-        await alerta('error', 'Erro ao adicionar concorrente', err.message || 'Verifique os dados e tente novamente.');
-        console.error(err);
+        mensagem_erro(err, 'Erro ao adicionar concorrente');
     }
 }
-
-// Criar Concorrente
-
-// parseValorBR
 
 async function criar_concorrente() {
     const DocNum = document.getElementById("DocNum").value;
@@ -739,70 +743,54 @@ async function criar_concorrente() {
     }
 }
 
-// Atualizar Concorrente + Configuração de linha
+// PATCHS
 
-function pegar_linha() {
+// Atualizar Informações da Cotação
 
-    const tbody = document.querySelector("#grid-concorrentes");
-    const linhas = Array.from(tbody.querySelectorAll("tr"));
+async function atualizar_cotacao() {
+    const DocNum = document.getElementById("DocNum").value;
+    const DocEntry = document.getElementById("DocEntry").value;
 
-    payload = [];
+    if (!DocNum) {
+        await alerta('warning', 'Nenhuma cotação selecionada', 'Você precisa buscar uma cotação primeiro.');
+        return;
+    }
 
-    linhas.forEach(linha => {
+    if (!DocEntry) {
+        await alerta('warning', 'Nenhuma cotação selecionada', 'Você precisa buscar uma cotação primeiro.');
+        return;
+    }
 
-        payload.push(linha);
+    const payload = {
+        U_Modalidade: document.getElementById("U_Modalidade").value,
+        U_Esfera: document.getElementById("U_Esfera").value,
+        U_NumLicitacao: document.getElementById("U_NumLicitacao").value
+    };
 
-        const qtdInput = linha.querySelector(".Qtde_grid");
-        const unitInput = linha.querySelector(".ValorUnit_grid");
-        const totCell = linha.querySelector(".ValorTot_grid");
+    try {
+        const resp = await apiFetch(`/api/atualizar_info_cotacao?DocEntry=${DocEntry}`,
+            {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }
+        );
 
-        if (unitInput) {
-            unitInput.addEventListener("input", (e) => {
-                formatarMoeda(e.target);
-                calcular_total_linha(linha);
-            });
+        if (!resp) return;
+
+        let res = null;
+        try { res = await resp.json(); } catch { }
+
+        if (!resp.ok) {
+            throw new Error(res?.erro || res?.message || "Erro ao atualizar informações da cotação");
         }
 
-        if (qtdInput) {
-            qtdInput.addEventListener("input", () => {
-                calcular_total_linha(linha);
-            });
-        }
+        await alerta('success', 'Sucesso', "Informações da Cotação atualizada com sucesso");
 
-        if (totCell) {
-            totCell.contentEditable = false;
-        }
-    });
-
-    tbody.addEventListener("click", (event) => {
-
-        const linhaClicada = event.target.closest("tr");
-        if (!linhaClicada) return;
-
-        linhas.forEach(l => {
-            l.classList.remove("linha-selecionada");
-
-            l.querySelectorAll("input, select").forEach(el => {
-                el.classList.remove("linha-selecionada-campo");
-            });
-        });
-
-        linhaClicada.classList.add("linha-selecionada");
-
-        linhaClicada.querySelectorAll("input, select").forEach(el => {
-            el.classList.add("linha-selecionada-campo");
-        });
-
-        const codigo = linhaClicada.querySelector(".rowno");
-        CodeSelecionado = codigo ? codigo.value : null;
-
-        if (!linhaClicada) {
-            return alerta('error', 'Erro', 'Linha do concorrente não encontrada.');
-        }
-
-        linhaSelecionada = linhaClicada;
-
-    });
+    } catch (err) {
+        mensagem_erro(err, 'Erro ao atualizar informações da cotação');
+        console.error(err);
+    }
 }
 
 async function atualizar_concorrente() {
@@ -917,71 +905,7 @@ async function atualizar_concorrente() {
     }
 }
 
-function validarNumero(input, nomeCampo) {
-    const valorBruto = input?.value ?? input?.textContent ?? "";
-
-    const valor = parseValorBR(valorBruto);
-
-    if (isNaN(valor) || valor <= 0) {
-        throw new Error(`Campo "${nomeCampo}" inválido. Informe um número maior que 0.`);
-    }
-    return valor;
-}
-
-// Adicionar informações da Cotação
-
-async function adicionar_info_cotacao() {
-    const DocNum = document.getElementById("DocNum").value;
-    const DocEntry = document.getElementById("DocEntry").value;
-
-    if (!DocNum) {
-        await alerta('warning', 'Nenhuma cotação selecionada', 'Você precisa buscar uma cotação primeiro.');
-        return;
-    }
-
-    if (!DocEntry) {
-        await alerta('warning', 'Nenhum DocEntry informado', 'É preciso informar um DocEntry primeiro.');
-        return;
-    }
-
-    const payload = {
-        Code: DocEntry,
-        Name: DocEntry,
-        U_DocEntry: DocEntry,
-        U_Modalidade: document.getElementById("U_Modalidade").value,
-        U_Esfera: document.getElementById("U_Esfera").value,
-        U_NumLicitacao: document.getElementById("U_NumLicitacao").value
-    };
-
-    try {
-        const resp = await apiFetch("/api/criar_cotacao_info", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (!resp) return;
-        if (resp.status === 409) {
-            await atualizar_cotacao();
-            return;
-        }
-
-        let res = null;
-        try { res = await resp.json(); } catch { }
-
-        if (!resp.ok) {
-            throw new Error(res?.erro || res?.message || `Erro HTTP ${resp.status}`);
-        }
-
-        await alerta('success', 'Sucesso', "Informações da Cotação adicionadas com sucesso");
-
-    } catch (err) {
-        mensagem_erro(err, 'Erro ao adicionar informações da cotação');
-        console.error(err);
-    }
-}
-
-// Formatar Moedas
+// Formatação de Moedas
 
 function formatarMoedaParaExibicao(valor) {
     if (valor == null) return '';
@@ -1003,33 +927,7 @@ function parseValorBR(valor) {
     return parseFloat(valor.replace(/\./g, '').replace(',', '.'));
 }
 
-//Limpar campos
-
-function limpar_campos() {
-    const campos = ["concorrente", "U_ThreatLevel", "U_Marca", "U_Modelo", "U_Observacao", "U_Quantidade", "U_ValorUnit", "U_ValorTot", "U_Posicao", "U_LineNum", "ItemCotacao", "U_FOC_GRP"]
-    campos.forEach(id => {
-        const elemento = document.getElementById(id);
-        if (!elemento) return;
-        if ($(elemento).hasClass("select2-hidden-accessible")) {
-            $(elemento)
-                .val(null)
-                .empty()
-                .append('<option value="">Selecione</option>')
-                .trigger('change');
-        } else {
-            elemento.value = "";
-        }
-    });
-}
-
-function limpar_campos_info() {
-    const campos = ["U_Modalidade", "U_Esfera", "U_NumLicitacao"]
-    campos.forEach(id => {
-        const elemento = document.getElementById(id);
-        if (!elemento) return;
-        elemento.value = "";
-    })
-}
+// Calculo de Valor Total
 
 function calcular_total() {
     const quantidade = Number(document.getElementById("U_Quantidade").value) || 0;
@@ -1057,6 +955,21 @@ function calcular_total_linha(linha) {
 
     totCell.textContent = formatarMoedaParaExibicao(total);
 }
+
+// Validação de campos númericos
+
+function validarNumero(input, nomeCampo) {
+    const valorBruto = input?.value ?? input?.textContent ?? "";
+
+    const valor = parseValorBR(valorBruto);
+
+    if (isNaN(valor) || valor <= 0) {
+        throw new Error(`Campo "${nomeCampo}" inválido. Informe um número maior que 0.`);
+    }
+    return valor;
+}
+
+// Tratamento de fetch com session expirada
 
 async function apiFetchJson(url, options = {}) {
     const res = await fetch(url, { credentials: "same-origin", ...options });
@@ -1104,10 +1017,104 @@ async function apiFetch(url, options = {}) {
     }
 }
 
-// Botão Logout
+// Funções de botões
+
+function GenericaClickBotao(id, funcaoExecutada) {
+    const botao = document.getElementById(id);
+    if (!botao) return;
+
+    botao.onclick = funcaoExecutada;
+}
+
+function modalConcorrenteEvt() {
+    if (eventoGridAtivo) return;
+    const grid = document.getElementById("grid-concorrentes");
+    if (!grid) return;
+    grid.addEventListener("click", function (e) {
+        const botao = e.target.closest(".btn-item-safe");
+        if (!botao) return;
+        abrirModalItemSafe(botao);
+    });
+    eventoGridAtivo = true;
+}
+
+function BuscarCotacaoEvt() {
+    GenericaClickBotao("buscar-cotacao", buscar_cotacao);
+}
+
+function LogoutEvt() {
+    GenericaClickBotao("btnLogout", chamar_logout);
+}
+
+function CriarNomeModalEvt() {
+    GenericaClickBotao("btnmodal", criarConcorrenteNome);
+}
+
+function FecharModalBtnEvt() {
+    GenericaClickBotao("closeI", fecharModal);
+}
+
+function FecharModalBtnAEvt() {
+    GenericaClickBotao("closeA", fecharModalItemSafe);
+}
+
+function criarInfoCotacaoEvt() {
+    GenericaClickBotao("btn-atualizar", adicionar_info_cotacao);
+}
+
+function criarConcorrenteEvt() {
+    GenericaClickBotao("btnadd", criar_concorrente);
+}
+
+function atualizarLinhasEvt() {
+    GenericaClickBotao("btnAtualizarConcorrente",atualizar_concorrente);
+}
+
+// Modal Itens na Grid 
+
+function abrirModalItemSafe(botao) {
+
+    const linha = botao.closest("tr");
+
+    const itemSelect = linha.querySelector(".items-safe");
+
+    if (Number(itemSelect?.value) !== 999) {
+        return alerta(
+            'warning',
+            'Item Safe incorreto',
+            'Você precisa informar que é um item fora da cotação primeiro.'
+        );
+    }
+    const input = linha.querySelector(".item-fora .nome-item");
+    inputAtivo = input;
+
+    document.getElementById("modalItemSafe").style.display = "flex";
+
+    document.getElementById("ItemsSafeModal").innerHTML = '<option value="">Carregando...</option>';
+    document.getElementById("ItemSafeModal").innerHTML = '<option value="">Selecione</option>';
+    carregar_filtro_itens("ItemsSafeModal", (code) => {
+        carregarItensFiltradosGenerico("ItemSafeModal", code, inputAtivo);
+    });
+}
+
+function fecharModalItemSafe() {
+    document.getElementById("modalItemSafe").style.display = "none";
+    inputAtivo = null;
+}
+
+// Modal criar competidor
+
+function abrirModal() {
+    document.getElementById("modalConcorrente").style.display = "flex";
+}
+
+function fecharModal() {
+    document.getElementById("modalConcorrente").style.display = "none";
+}
+
+// Logout
 
 async function chamar_logout() {
-
     const confirmacao = await Swal.fire({
         icon: "question",
         title: "Deseja sair?",
@@ -1139,35 +1146,96 @@ async function chamar_logout() {
     }
 }
 
+//Limpar campos
 
-// ===== Modal Itens =====
-
-function abrirModalItemSafe(botao) {
-
-    const linha = botao.closest("tr");
-
-    const itemSelect = linha.querySelector(".items-safe");
-
-    if (Number(itemSelect?.value) !== 999) {
-        return alerta(
-            'warning',
-            'Item Safe incorreto',
-            'Você precisa informar que é um item fora da cotação primeiro.'
-        );
-    }
-    const input = linha.querySelector(".item-fora .nome-item");
-    inputAtivo = input;
-
-    document.getElementById("modalItemSafe").style.display = "flex";
-
-    document.getElementById("ItemsSafeModal").innerHTML = '<option value="">Carregando...</option>';
-    document.getElementById("ItemSafeModal").innerHTML = '<option value="">Selecione</option>';
-    carregar_filtro_itens("ItemsSafeModal", (code) => {
-        carregarItensFiltradosGenerico("ItemSafeModal", code, inputAtivo);
+function limpar_campos() {
+    const campos = ["concorrente", "U_ThreatLevel", "U_Marca", "U_Modelo", "U_Observacao", "U_Quantidade", "U_ValorUnit", "U_ValorTot", "U_Posicao", "U_LineNum", "ItemCotacao", "U_FOC_GRP"]
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (!elemento) return;
+        if ($(elemento).hasClass("select2-hidden-accessible")) {
+            $(elemento)
+                .val(null)
+                .empty()
+                .append('<option value="">Selecione</option>')
+                .trigger('change');
+        } else {
+            elemento.value = "";
+        }
     });
 }
 
-function fecharModalItemSafe() {
-    document.getElementById("modalItemSafe").style.display = "none";
-    inputAtivo = null;
+function limpar_campos_info() {
+    const campos = ["U_Modalidade", "U_Esfera", "U_NumLicitacao"]
+    campos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (!elemento) return;
+        elemento.value = "";
+    });
+}
+
+// Pegar linha pra atualizar
+
+function pegar_linha() {
+
+    const tbody = document.querySelector("#grid-concorrentes");
+    const linhas = Array.from(tbody.querySelectorAll("tr"));
+
+    payload = [];
+
+    linhas.forEach(linha => {
+
+        payload.push(linha);
+
+        const qtdInput = linha.querySelector(".Qtde_grid");
+        const unitInput = linha.querySelector(".ValorUnit_grid");
+        const totCell = linha.querySelector(".ValorTot_grid");
+
+        if (unitInput) {
+            unitInput.addEventListener("input", (e) => {
+                formatarMoeda(e.target);
+                calcular_total_linha(linha);
+            });
+        }
+
+        if (qtdInput) {
+            qtdInput.addEventListener("input", () => {
+                calcular_total_linha(linha);
+            });
+        }
+
+        if (totCell) {
+            totCell.contentEditable = false;
+        }
+    });
+
+    tbody.addEventListener("click", (event) => {
+
+        const linhaClicada = event.target.closest("tr");
+        if (!linhaClicada) return;
+
+        linhas.forEach(l => {
+            l.classList.remove("linha-selecionada");
+
+            l.querySelectorAll("input, select").forEach(el => {
+                el.classList.remove("linha-selecionada-campo");
+            });
+        });
+
+        linhaClicada.classList.add("linha-selecionada");
+
+        linhaClicada.querySelectorAll("input, select").forEach(el => {
+            el.classList.add("linha-selecionada-campo");
+        });
+
+        const codigo = linhaClicada.querySelector(".rowno");
+        CodeSelecionado = codigo ? codigo.value : null;
+
+        if (!linhaClicada) {
+            return alerta('error', 'Erro', 'Linha do concorrente não encontrada.');
+        }
+
+        linhaSelecionada = linhaClicada;
+
+    });
 }

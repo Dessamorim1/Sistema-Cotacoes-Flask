@@ -37,7 +37,7 @@
             Cotações - SAFE SOLUÇÕES
         </div>
         <div class="btn-logout">
-            <button type="button" id="btnLogout" class="out-button" onclick="chamar_logout()">
+            <button type="button" id="btnLogout" class="out-button">
                 <i class="ph ph-sign-out"></i>
             </button>
         </div>
@@ -46,10 +46,10 @@
         <div>
             <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
                 <div class="header-default df alg fw header-tab">
-                    <button class="glass-btn" onclick="buscar_cotacao()">
+                    <button type="button" id="buscar-cotacao" class="glass-btn">
                         <i class="ph ph-magnifying-glass"></i>
                     </button>
-                    <button type="button" id="btn-atualizar" onclick="adicionar_info_cotacao()">
+                    <button type="button" id="btn-atualizar">
                         <i class="ph ph-user-switch"></i>
                     </button>
                 </div>
@@ -231,7 +231,7 @@
         <div>
             <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
                 <div class="header-default df alg fw header-tab">
-                    <button type="button" onclick="criar_concorrente()" id="btnadd">
+                    <button type="button" id="btnadd">
                         <i class="ph ph-user-circle-plus"></i>
                     </button>
                 </div>
@@ -348,9 +348,6 @@
                                         </div>
                                     </div>
                                     <div class="col-12" id="itens-session">
-                                        <button type="button" class="btnFecharItens">
-                                            <i class="ph ph-x"></i>
-                                        </button>
                                         <div class="inputs-form">
                                             <div class="row alg">
                                                 <div class="col-xl-3 label">
@@ -387,7 +384,7 @@
         <div>
             <section class="animated scroll_estilizado fadeIn content-inside" style="height: 100%;">
                 <div class="header-default df alg fw header-tab">
-                    <button id="btnAtualizarConcorrente" onclick="atualizar_concorrente()" type="button">
+                    <button id="btnAtualizarConcorrente" type="button">
                         <i class="ph ph-user-switch atualizar"></i>
                     </button>
                 </div>
@@ -412,37 +409,7 @@
                         </thead>
 
                         <tbody id="grid-concorrentes">
-                            <tr>
-                                <td class="rowno"></td>
-                                <td><select class="form-select form-select-sm Concorrente_grid">
-                                        <option selected disabled>Selecione</option>
-                                        <option value=""></option>
-                                    </select></td>
-                                <td><select class="form-select form-select-sm ThreatLevel_grid">
-                                        <option selected disabled>Selecione</option>
-                                        <option value="Low">Baixo</option>
-                                        <option value="Medium">Médio</option>
-                                        <option value="High">Alto</option>
-                                    </select></td>
-                                <td class="Marca_grid"></td>
-                                <td class="Modelo_grid"></td>
-                                <td class="Qtde_grid"></td>
-                                <td class="ValorUnit_grid"></td>
-                                <td class="ValorTot_grid"></td>
-                                <td class="Pos_grid"></td>
-                                <td>
-                                    <select class="form-select form-select-sm items-safe">
-                                        <option selected disabled>Selecione</option>
-                                        <option value=""></option>
-                                    </select>
-                                </td>
-                                <td class="cotacao item-fora" style="display:flex; gap:4px; align-items:center;">
-                                    <input type="text" class="nome-item form-control form-control-sm" readonly />
-                                     <button type="button" onclick="abrirModalItemSafe(this)">
-                                        <i class="ph ph-arrow-right"
-                                        style="color: #ecd713"></i></button>
-                                </td>
-                            </tr>
+                            <!-- linhas serão geradas via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -453,11 +420,11 @@
     <!-- < --Modal para adicionar novo concorrente -->
     <div id="modalConcorrente" class="modal">
         <div class="modal-content">
-            <span onclick="fecharModal()" class="close">&times;</span>
+            <span id="closeI" class="close">&times;</span>
             <h3>Definir Novo Competidor</h3>
             <label for="nomeCompetidor">Nome do Competidor</label>
             <input type="text" id="nomeCompetidor" required />
-            <button type="button" id="btnmodal" onclick="criarConcorrente()">Salvar</button>
+            <button type="button" id="btnmodal">Salvar</button>
             <p>O nome só pode possuir 15 caracteres.</p>
         </div>
     </div>
@@ -465,7 +432,7 @@
     <!-- Modal Item Safe -->
     <div id="modalItemSafe" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="fecharModalItemSafe()">&times;</span>
+            <span id="closeA" class="close">&times;</span>
             <h3>Selecionar Item Safe</h3>
 
             <div class="form-row-end">
