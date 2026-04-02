@@ -1,6 +1,5 @@
 from flask import Flask,render_template,request,url_for,redirect,session,jsonify
 from login_required import login_required
-import os
 
 from dotenv import load_dotenv
 from waitress import serve
@@ -24,6 +23,8 @@ from criar_concorrente.criar_concorrentes import criar_concorrentes_blueprint
 from criar_cotacao_info.criar_cotacao_info import criar_cotacao_info_blueprint
 
 import logging
+import os
+import sys
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,9 +37,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
-app = Flask(__name__)
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  
+    except Exception:
+        base_path = os.path.abspath(".")  
+    return os.path.join(base_path, relative_path)
+
+app = Flask(__name__,template_folder=resource_path("templates"),static_folder=resource_path("static"))
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 app.permanent_session_lifetime = timedelta(minutes=30)
 
